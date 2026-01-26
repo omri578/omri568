@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>לוח תוצאות</title>
+
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b5b2a">
+
+  <style>
+    body{margin:0;font-family:Arial;background:#000}
+    .app{
+      min-height:100vh;
+      background:url("assets/pitch.jpg") center/cover no-repeat;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+    .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+    .content{position:relative;z-index:2;width:100%;max-width:900px}
+    h1{color:#fff;text-align:center;margin-bottom:16px}
+
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+    .team{
+      width:30%;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+    }
+
+    .logo{
+      width:100px;height:100px;
+      border-radius:18px;
+      overflow:hidden;
+      border:3px solid #fff;
+    }
+    .logo img{width:100%;height:100%;object-fit:cover}
+    .name{color:#fff;font-weight:800}
+
+    .scorebox{
+      background:rgba(0,0,0,.7);
+      border-radius:18px;
+      padding:14px 20px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+    }
+
+    .score{
+      color:#fff;
+      font-size:52px;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .dash{color:#fff;font-size:36px;font-weight:700}
+
+    .buttons{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      margin-top:16px;
+    }
+
+    button{
+      padding:10px 16px;
+      border:none;
+      border-radius:12px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    dialog{
+      border:none;
+      border-radius:16px;
+      padding:14px;
+      max-width:500px;
+      width:90%;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .pick{
+      border:2px solid #ddd;
+      border-radius:14px;
+      padding:8px;
+      cursor:pointer;
+      text-align:center;
+    }
+
+    .pick img{
+      width:70px;height:70px;
+      border-radius:14px;
+      object-fit:cover;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="overlay"></div>
+
+  <div class="content">
+    <h1>לוח תוצאות</h1>
+
+    <div class="row">
+      <div class="team" onclick="openPicker('home')">
+        <div class="logo"><img id="homeLogo" src="assets/team1.png"></div>
+        <div class="name" id="homeName">קבוצה א׳</div>
+      </div>
+
+      <div class="scorebox">
+        <div class="score" id="homeScore">0</div>
+        <div class="dash">-</div>
+        <div class="score" id="awayScore">0</div>
+      </div>
+
+      <div class="team" onclick="openPicker('away')">
+        <div class="logo"><img id="awayLogo" src="assets/team2.png"></div>
+        <div class="name" id="awayName">קבוצה ב׳</div>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button onclick="resetScore()">איפוס</button>
+      <button onclick="undoGoal()">בטל גול</button>
+    </div>
+  </div>
+</div>
+
+<audio id="goalSound" src="assets/goal.mp3"></audio>
+
+<dialog id="picker">
+  <h3>בחר קבוצה</h3>
+  <div class="grid" id="grid"></div>
+  <div style="text-align:right;margin-top:10px">
+    <button onclick="picker.close()">סגור</button>
+  </div>
+</dialog>
+
+<script>
+const teams = [
+  {name:"מכבי תל אביב", logo:"assets/team1.png"},
+  {name:"הפועל תל אביב", logo:"assets/team2.png"},
+  {name:"מכבי חיפה", logo:"assets/team3.png"},
+  {name:"בית״ר ירושלים", logo:"assets/team4.png"},
+  {name:"הפועל באר שבע", logo:"assets/team5.png"},
+  {name:"נתניה", logo:"assets/team6.png"}
+];
+
+let side = "home";
+let last = null;
+
+const goalSound = document.getElementById("goalSound");
+const homeScore = document.getElementById("homeScore");
+const awayScore = document.getElementById("awayScore");
+
+homeScore.onclick = () => goal("home");
+awayScore.onclick = () => goal("away");
+
+function goal(s){
+  if(s==="home") homeScore.textContent++;
+  else awayScore.textContent++;
+  last = s;
+  goalSound.currentTime = 0;
+  goalSound.play();
+}
+
+function resetScore(){
+  homeScore.textContent = 0;
+  awayScore.textContent = 0;
+  last = null;
+}
+
+function undoGoal(){
+  if(last==="home" && homeScore.textContent>0) homeScore.textContent--;
+  if(last==="away" && awayScore.textContent>0) awayScore.textContent--;
+  last = null;
+}
+
+const picker = document.getElementById("picker");
+const grid = document.getElementById("grid");
+
+function openPicker(s){
+  side = s;
+  grid.innerHTML = "";
+  teams.forEach(t=>{
+    const d=document.createElement("div");
+    d.className="pick";
+    d.innerHTML=`<img src="${t.logo}"><div>${t.name}</div>`;
+    d.onclick=()=>{
+      document.getElementById(side+"Logo").src=t.logo;
+      document.getElementById(side+"Name").textContent=t.name;
+      picker.close();
+    };
+    grid.appendChild(d);
+  });
+  picker.showModal();
+}
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+
+</body>
+</html>
