@@ -67,6 +67,7 @@
       justify-content:center;
       gap:10px;
       margin-top:16px;
+      flex-wrap:wrap;
     }
 
     button{
@@ -75,6 +76,20 @@
       border-radius:12px;
       font-weight:800;
       cursor:pointer;
+    }
+
+    .btn-reset{background:#fff}
+    .btn-undo{background:#ffd54a}
+    .btn-var{background:#ff7676}
+
+    .varStatus{
+      color:#fff;
+      text-align:center;
+      margin-top:12px;
+      font-weight:900;
+      background:rgba(0,0,0,.6);
+      padding:8px 12px;
+      border-radius:12px;
     }
 
     dialog{
@@ -135,9 +150,12 @@
     </div>
 
     <div class="buttons">
-      <button onclick="resetScore()">איפוס</button>
-      <button onclick="undoGoal()">בטל גול</button>
+      <button class="btn-reset" onclick="resetScore()">איפוס</button>
+      <button class="btn-undo" onclick="undoGoal()">בטל גול</button>
+      <button class="btn-var" onclick="runVAR()">VAR</button>
     </div>
+
+    <div class="varStatus" id="varStatus">VAR: אין בדיקה כרגע</div>
   </div>
 </div>
 
@@ -164,8 +182,9 @@
   const goalSound = document.getElementById("goalSound");
   const homeScore = document.getElementById("homeScore");
   const awayScore = document.getElementById("awayScore");
+  const varStatus = document.getElementById("varStatus");
 
-  let lastGoal = null;
+  let lastGoal = null; // "home" / "away"
 
   function playGoal(){
     try{
@@ -181,6 +200,7 @@
     if(side==="home") homeScore.textContent++;
     else awayScore.textContent++;
     lastGoal = side;
+    varStatus.textContent = "VAR: אפשר לבדוק את הגול האחרון";
     playGoal();
   }
 
@@ -188,6 +208,7 @@
     homeScore.textContent = 0;
     awayScore.textContent = 0;
     lastGoal = null;
+    varStatus.textContent = "VAR: אין בדיקה כרגע";
   }
 
   function undoGoal(){
@@ -196,6 +217,26 @@
     } else if(lastGoal==="away" && awayScore.textContent>0){
       awayScore.textContent--;
     }
+    lastGoal = null;
+    varStatus.textContent = "VAR: אין בדיקה כרגע";
+  }
+
+  function runVAR(){
+    if(!lastGoal){
+      varStatus.textContent = "VAR: אין גול לבדיקה";
+      return;
+    }
+
+    const approved = Math.random() < 0.5;
+
+    if(approved){
+      varStatus.textContent = "VAR: ✅ הגול אושר!";
+    } else {
+      varStatus.textContent = "VAR: ❌ הגול נפסל!";
+      if(lastGoal==="home" && homeScore.textContent>0) homeScore.textContent--;
+      if(lastGoal==="away" && awayScore.textContent>0) awayScore.textContent--;
+    }
+
     lastGoal = null;
   }
 
