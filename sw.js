@@ -1,4 +1,4 @@
-const CACHE = "score-app-v3";
+const CACHE = "score-app-v4";
 const FILES = [
   "./",
   "index.html",
@@ -25,5 +25,6 @@ self.addEventListener("fetch", e => {
     caches.match(e.request).then(r => r || fetch(e.request))
   );
 });
+
 
 
