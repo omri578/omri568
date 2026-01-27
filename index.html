@@ -20,8 +20,8 @@
       padding:16px;
     }
     .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
-    .content{position:relative;z-index:2;width:100%;max-width:900px}
-    h1{color:#fff;text-align:center;margin-bottom:16px}
+    .content{position:relative;z-index:2;width:100%;max-width:980px}
+    h1{color:#fff;text-align:center;margin:8px 0 14px}
 
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 
@@ -39,9 +39,10 @@
       border-radius:18px;
       overflow:hidden;
       border:3px solid #fff;
+      background:rgba(0,0,0,.2);
     }
     .logo img{width:100%;height:100%;object-fit:cover}
-    .name{color:#fff;font-weight:800}
+    .name{color:#fff;font-weight:800;text-align:center}
 
     .scorebox{
       background:rgba(0,0,0,.7);
@@ -58,8 +59,10 @@
       font-weight:900;
       cursor:pointer;
       user-select:none;
+      padding:2px 10px;
+      border-radius:12px;
     }
-
+    .score:active{transform:scale(.99)}
     .dash{color:#fff;font-size:36px;font-weight:700}
 
     .buttons{
@@ -67,14 +70,54 @@
       justify-content:center;
       gap:10px;
       margin-top:16px;
+      flex-wrap:wrap;
     }
 
     button{
-      padding:10px 16px;
+      padding:10px 14px;
       border:none;
       border-radius:12px;
       font-weight:800;
       cursor:pointer;
+    }
+    .btn-primary{background:#ffffff}
+    .btn-warn{background:#ffd54a}
+    .btn-danger{background:#ff7676}
+    .btn-dark{background:#1f1f1f;color:#fff}
+
+    .mode-pill{
+      display:inline-block;
+      background:rgba(0,0,0,.55);
+      color:#fff;
+      padding:8px 12px;
+      border-radius:999px;
+      font-weight:900;
+      margin:0 auto 10px;
+    }
+
+    .hint{
+      color:#fff;
+      text-align:center;
+      opacity:.9;
+      margin-top:10px;
+      font-weight:700;
+    }
+
+    .varBox{
+      margin-top:10px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .varStatus{
+      color:#fff;
+      background:rgba(0,0,0,.65);
+      padding:8px 12px;
+      border-radius:12px;
+      font-weight:900;
+      min-height:18px;
     }
 
     dialog{
@@ -98,6 +141,7 @@
       padding:8px;
       cursor:pointer;
       text-align:center;
+      background:#fff;
     }
 
     .pick img{
@@ -105,6 +149,10 @@
       border-radius:14px;
       object-fit:cover;
     }
+
+    /* דפים */
+    .screen{display:none;}
+    .screen.active{display:block;}
   </style>
 </head>
 <body>
@@ -113,37 +161,83 @@
   <div class="overlay"></div>
 
   <div class="content">
-    <h1>לוח תוצאות</h1>
 
-    <div class="row">
-      <div class="team" onclick="openPicker('home')">
-        <div class="logo"><img id="homeLogo" src="assets/team1.png"></div>
-        <div class="name" id="homeName">קבוצה א׳</div>
+    <!-- ===== מסך ראשי ===== -->
+    <div class="screen active" id="screenMain">
+      <div class="mode-pill">מצב רגיל</div>
+      <h1>לוח תוצאות</h1>
+
+      <div class="row">
+        <div class="team" onclick="openPicker('home')">
+          <div class="logo"><img id="homeLogo" src="assets/team1.png" alt=""></div>
+          <div class="name" id="homeName">קבוצה א׳</div>
+        </div>
+
+        <div class="scorebox">
+          <div class="score" id="homeScore">0</div>
+          <div class="dash">-</div>
+          <div class="score" id="awayScore">0</div>
+        </div>
+
+        <div class="team" onclick="openPicker('away')">
+          <div class="logo"><img id="awayLogo" src="assets/team2.png" alt=""></div>
+          <div class="name" id="awayName">קבוצה ב׳</div>
+        </div>
       </div>
 
-      <div class="scorebox">
-        <div class="score" id="homeScore">0</div>
-        <div class="dash">-</div>
-        <div class="score" id="awayScore">0</div>
+      <div class="buttons">
+        <button class="btn-primary" onclick="resetScore()">איפוס</button>
+        <button class="btn-warn" onclick="undoGoal()">בטל גול</button>
+        <button class="btn-dark" onclick="goToPenalties()">מצב פנדלים</button>
       </div>
 
-      <div class="team" onclick="openPicker('away')">
-        <div class="logo"><img id="awayLogo" src="assets/team2.png"></div>
-        <div class="name" id="awayName">קבוצה ב׳</div>
-      </div>
+      <div class="hint">לחץ על המספר כדי להוסיף גול ⚽</div>
     </div>
 
-    <div class="buttons">
-      <button onclick="resetScore()">איפוס</button>
-      <button onclick="undoGoal()">בטל גול</button>
+    <!-- ===== מסך פנדלים ===== -->
+    <div class="screen" id="screenPen">
+      <div class="mode-pill">מצב פנדלים</div>
+      <h1>פנדלים</h1>
+
+      <div class="row">
+        <div class="team" onclick="openPicker('home')">
+          <div class="logo"><img id="homeLogo2" src="assets/team1.png" alt=""></div>
+          <div class="name" id="homeName2">קבוצה א׳</div>
+        </div>
+
+        <div class="scorebox">
+          <div class="score" id="homePen">0</div>
+          <div class="dash">-</div>
+          <div class="score" id="awayPen">0</div>
+        </div>
+
+        <div class="team" onclick="openPicker('away')">
+          <div class="logo"><img id="awayLogo2" src="assets/team2.png" alt=""></div>
+          <div class="name" id="awayName2">קבוצה ב׳</div>
+        </div>
+      </div>
+
+      <div class="varBox">
+        <button class="btn-danger" onclick="runVAR()">VAR</button>
+        <div class="varStatus" id="varStatus">VAR: עוד לא נבדק</div>
+      </div>
+
+      <div class="buttons">
+        <button class="btn-primary" onclick="resetPens()">איפוס פנדלים</button>
+        <button class="btn-warn" onclick="undoPen()">בטל פנדל</button>
+        <button class="btn-dark" onclick="backToMain()">חזרה ללוח הראשי</button>
+      </div>
+
+      <div class="hint">לחץ על המספר כדי להוסיף פנדל. ואז אפשר ללחוץ VAR 🎥</div>
     </div>
+
   </div>
 </div>
 
-<audio id="goalSound" src="assets/goal.mp3"></audio>
+<audio id="goalSound" src="assets/goal.mp3" preload="auto"></audio>
 
 <dialog id="picker">
-  <h3>בחר קבוצה</h3>
+  <h3 id="pickerTitle">בחר קבוצה</h3>
   <div class="grid" id="grid"></div>
   <div style="text-align:right;margin-top:10px">
     <button onclick="picker.close()">סגור</button>
@@ -151,68 +245,191 @@
 </dialog>
 
 <script>
-const teams = [
-  {name:"מכבי תל אביב", logo:"assets/team1.png"},
-  {name:"הפועל תל אביב", logo:"assets/team2.png"},
-  {name:"מכבי חיפה", logo:"assets/team3.png"},
-  {name:"בית״ר ירושלים", logo:"assets/team4.png"},
-  {name:"הפועל באר שבע", logo:"assets/team5.png"},
-  {name:"נתניה", logo:"assets/team6.png"}
-];
+  // ===== קבוצות (דוגמה) =====
+  const teams = [
+    {name:"מכבי תל אביב", logo:"assets/team1.png"},
+    {name:"הפועל תל אביב", logo:"assets/team2.png"},
+    {name:"מכבי חיפה", logo:"assets/team3.png"},
+    {name:"בית״ר ירושלים", logo:"assets/team4.png"},
+    {name:"הפועל באר שבע", logo:"assets/team5.png"},
+    {name:"נתניה", logo:"assets/team6.png"}
+  ];
 
-let side = "home";
-let last = null;
+  // ===== אודיו =====
+  const goalSound = document.getElementById("goalSound");
+  function playGoal(){
+    try { goalSound.currentTime = 0; goalSound.play(); } catch(e) {}
+  }
 
-const goalSound = document.getElementById("goalSound");
-const homeScore = document.getElementById("homeScore");
-const awayScore = document.getElementById("awayScore");
+  // ===== מסכים =====
+  const screenMain = document.getElementById("screenMain");
+  const screenPen  = document.getElementById("screenPen");
+  let currentMode = "main"; // "main" / "pen"
 
-homeScore.onclick = () => goal("home");
-awayScore.onclick = () => goal("away");
+  function showScreen(which){
+    currentMode = which;
+    screenMain.classList.toggle("active", which === "main");
+    screenPen.classList.toggle("active", which === "pen");
+    // הודעת VAR מתאפסת כשנכנסים
+    if(which === "pen") document.getElementById("varStatus").textContent = "VAR: עוד לא נבדק";
+  }
 
-function goal(s){
-  if(s==="home") homeScore.textContent++;
-  else awayScore.textContent++;
-  last = s;
-  goalSound.currentTime = 0;
-  goalSound.play();
-}
+  function goToPenalties(){
+    // סנכרון לוגואים/שמות למסך פנדלים
+    syncTeamsToPenaltyScreen();
+    showScreen("pen");
+  }
+  function backToMain(){
+    showScreen("main");
+  }
 
-function resetScore(){
-  homeScore.textContent = 0;
-  awayScore.textContent = 0;
-  last = null;
-}
+  // ===== מצב רגיל =====
+  const homeScore = document.getElementById("homeScore");
+  const awayScore = document.getElementById("awayScore");
 
-function undoGoal(){
-  if(last==="home" && homeScore.textContent>0) homeScore.textContent--;
-  if(last==="away" && awayScore.textContent>0) awayScore.textContent--;
-  last = null;
-}
+  let lastMain = null; // "home"/"away"
 
-const picker = document.getElementById("picker");
-const grid = document.getElementById("grid");
+  homeScore.onclick = () => goalMain("home");
+  awayScore.onclick = () => goalMain("away");
 
-function openPicker(s){
-  side = s;
-  grid.innerHTML = "";
-  teams.forEach(t=>{
-    const d=document.createElement("div");
-    d.className="pick";
-    d.innerHTML=`<img src="${t.logo}"><div>${t.name}</div>`;
-    d.onclick=()=>{
-      document.getElementById(side+"Logo").src=t.logo;
-      document.getElementById(side+"Name").textContent=t.name;
-      picker.close();
-    };
-    grid.appendChild(d);
-  });
-  picker.showModal();
-}
+  function goalMain(side){
+    if(side==="home") homeScore.textContent = String(Number(homeScore.textContent) + 1);
+    else awayScore.textContent = String(Number(awayScore.textContent) + 1);
+    lastMain = side;
+    playGoal();
+  }
 
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
-}
+  function resetScore(){
+    homeScore.textContent = "0";
+    awayScore.textContent = "0";
+    lastMain = null;
+  }
+
+  function undoGoal(){
+    if(lastMain==="home"){
+      homeScore.textContent = String(Math.max(0, Number(homeScore.textContent) - 1));
+    } else if(lastMain==="away"){
+      awayScore.textContent = String(Math.max(0, Number(awayScore.textContent) - 1));
+    }
+    lastMain = null;
+  }
+
+  // ===== מצב פנדלים =====
+  const homePen = document.getElementById("homePen");
+  const awayPen = document.getElementById("awayPen");
+
+  let lastPen = null; // "home"/"away"
+  let lastPenWasGoal = false; // כדי לדעת אם VAR רלוונטי
+
+  homePen.onclick = () => addPen("home");
+  awayPen.onclick = () => addPen("away");
+
+  function addPen(side){
+    if(side==="home") homePen.textContent = String(Number(homePen.textContent) + 1);
+    else awayPen.textContent = String(Number(awayPen.textContent) + 1);
+
+    lastPen = side;
+    lastPenWasGoal = true;
+
+    document.getElementById("varStatus").textContent = "VAR: אפשר לבדוק את הגול האחרון";
+    playGoal();
+  }
+
+  function resetPens(){
+    homePen.textContent = "0";
+    awayPen.textContent = "0";
+    lastPen = null;
+    lastPenWasGoal = false;
+    document.getElementById("varStatus").textContent = "VAR: עוד לא נבדק";
+  }
+
+  function undoPen(){
+    if(lastPen==="home"){
+      homePen.textContent = String(Math.max(0, Number(homePen.textContent) - 1));
+    } else if(lastPen==="away"){
+      awayPen.textContent = String(Math.max(0, Number(awayPen.textContent) - 1));
+    }
+    lastPen = null;
+    lastPenWasGoal = false;
+    document.getElementById("varStatus").textContent = "VAR: עוד לא נבדק";
+  }
+
+  // ===== VAR (50/50) =====
+  function runVAR(){
+    const status = document.getElementById("varStatus");
+
+    if(!lastPenWasGoal || !lastPen){
+      status.textContent = "VAR: אין גול אחרון לבדיקה";
+      return;
+    }
+
+    const isGoal = Math.random() < 0.5; // 50% כן / 50% לא
+
+    if(isGoal){
+      status.textContent = "VAR: ✅ הגול אושר!";
+      // נשאר אותו דבר
+    } else {
+      status.textContent = "VAR: ❌ הגול נפסל!";
+      // מורידים 1 מהצד האחרון (אם אפשר)
+      if(lastPen === "home"){
+        homePen.textContent = String(Math.max(0, Number(homePen.textContent) - 1));
+      } else {
+        awayPen.textContent = String(Math.max(0, Number(awayPen.textContent) - 1));
+      }
+    }
+
+    // אחרי VAR מסיימים את הבדיקה (כדי שלא ילחצו שוב על אותו גול)
+    lastPenWasGoal = false;
+    lastPen = null;
+  }
+
+  // ===== בחירת קבוצה (עובד לשני המסכים) =====
+  const picker = document.getElementById("picker");
+  const grid = document.getElementById("grid");
+  let pickSide = "home";
+
+  function openPicker(side){
+    pickSide = side;
+    document.getElementById("pickerTitle").textContent =
+      side === "home" ? "בחר קבוצה (בית)" : "בחר קבוצה (חוץ)";
+
+    grid.innerHTML = "";
+    teams.forEach(t=>{
+      const d=document.createElement("div");
+      d.className="pick";
+      d.innerHTML=`<img src="${t.logo}" alt=""><div style="font-weight:900;margin-top:6px">${t.name}</div>`;
+      d.onclick=()=>{
+        setTeam(side, t);
+        picker.close();
+      };
+      grid.appendChild(d);
+    });
+
+    picker.showModal();
+  }
+
+  function setTeam(side, team){
+    // מסך ראשי
+    document.getElementById(side+"Logo").src = team.logo;
+    document.getElementById(side+"Name").textContent = team.name;
+
+    // מסך פנדלים (לוגו/שם שני)
+    document.getElementById(side+"Logo2").src = team.logo;
+    document.getElementById(side+"Name2").textContent = team.name;
+  }
+
+  function syncTeamsToPenaltyScreen(){
+    // מעתיק מהמסך הראשי למסך פנדלים (ליתר ביטחון)
+    document.getElementById("homeLogo2").src = document.getElementById("homeLogo").src;
+    document.getElementById("awayLogo2").src = document.getElementById("awayLogo").src;
+    document.getElementById("homeName2").textContent = document.getElementById("homeName").textContent;
+    document.getElementById("awayName2").textContent = document.getElementById("awayName").textContent;
+  }
+
+  // ===== Service Worker =====
+  if("serviceWorker" in navigator){
+    navigator.serviceWorker.register("sw.js");
+  }
 </script>
 
 </body>
