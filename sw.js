@@ -13,7 +13,15 @@ const FILES = [
   "assets/team3.png",
   "assets/team4.png",
   "assets/team5.png",
-  "assets/team6.png"
+  "assets/team6.png",
+  "assets/real.png",
+"assets/barcelona.png",
+"assets/psg.png",
+"assets/mancity.png",
+"assets/manutd.png",
+"assets/inter.png",
+"assets/monaco.png",
+"assets/juventus.png"
 ];
 
 self.addEventListener("install", (e) => {
@@ -39,3 +47,4 @@ self.addEventListener("fetch", (e) => {
     caches.match(e.request).then((r) => r || fetch(e.request))
   );
 });
+
