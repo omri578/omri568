@@ -21,7 +21,7 @@ const FILES = [
 "assets/manutd.png",
 "assets/inter.png",
 "assets/monaco.png",
-"assets/juventus.png"
+"assets/juve.png"
 ];
 
 self.addEventListener("install", (e) => {
@@ -47,4 +47,5 @@ self.addEventListener("fetch", (e) => {
     caches.match(e.request).then((r) => r || fetch(e.request))
   );
 });
+
 
