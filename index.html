@@ -7,16 +7,12 @@
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b5b2a">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
-
   <style>
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     body{font-family:'Heebo',Arial,sans-serif;background:#000;overscroll-behavior:none;}
 
-    .app{
-      min-height:100vh;
-      background:url("assets/pitch.png") center/cover no-repeat;
-      position:relative;display:flex;align-items:center;justify-content:center;padding:16px;
-    }
+    .app{min-height:100vh;background:url("assets/pitch.png") center/cover no-repeat;
+      position:relative;display:flex;align-items:center;justify-content:center;padding:16px;}
     .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
     .content{position:relative;z-index:2;width:100%;max-width:900px}
     h1{color:#fff;text-align:center;margin-bottom:16px;font-weight:900}
@@ -30,10 +26,8 @@
     .dash{color:#fff;font-size:36px;font-weight:700}
     .buttons{display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
     button{padding:10px 16px;border:none;border-radius:12px;font-weight:800;cursor:pointer;
-      font-family:'Heebo',Arial,sans-serif;touch-action:manipulation;min-height:44px;}
-    .btn-reset{background:#fff}
-    .btn-undo{background:#ffd54a}
-    .btn-var{background:#ff7676}
+      font-family:'Heebo',Arial,sans-serif;touch-action:manipulation;min-height:46px;}
+    .btn-reset{background:#fff}.btn-undo{background:#ffd54a}.btn-var{background:#ff7676}
     .btn-half{background:#7ad1ff}
     .btn-lineup{background:#FFE000;color:#005234;border:2px solid #005234;font-size:15px;display:none;}
     .varStatus{color:#fff;text-align:center;margin-top:12px;font-weight:900;
@@ -46,133 +40,78 @@
     .pick img{width:70px;height:70px;border-radius:14px;object-fit:cover;}
 
     /* LINEUP MODAL */
-    .lineup-modal{
-      display:none;position:fixed;inset:0;z-index:1000;
-      background:rgba(0,0,0,.92);overflow-y:auto;
-      overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
-    }
+    .lineup-modal{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.93);
+      overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
     .lineup-modal.open{display:block;}
-    .lineup-inner{
-      background:#005234;min-height:100vh;
-      padding:0 14px 50px;width:100%;max-width:680px;margin:0 auto;color:#fff;
-    }
-    .lineup-header{
-      display:flex;align-items:center;justify-content:space-between;
+    .lineup-inner{background:#005234;min-height:100vh;padding:0 14px 50px;
+      width:100%;max-width:680px;margin:0 auto;color:#fff;}
+    .lineup-header{display:flex;align-items:center;justify-content:space-between;
       position:sticky;top:0;background:#005234;z-index:20;
-      padding:12px 0;border-bottom:1px solid rgba(255,255,255,.15);
-      margin-bottom:14px;
-    }
+      padding:12px 0;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:14px;}
     .lineup-title{display:flex;align-items:center;gap:10px;font-weight:900;font-size:18px;}
     .lineup-title img{width:36px;height:36px;border-radius:8px;object-fit:cover}
-    .btn-close-lineup{
-      background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:10px;
-      padding:10px 18px;cursor:pointer;font-weight:700;font-size:16px;min-height:48px;min-width:60px;
-    }
+    .btn-close-lineup{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:10px;
+      padding:10px 18px;cursor:pointer;font-weight:700;font-size:16px;min-height:48px;min-width:60px;}
 
     .formation-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
-    .f-btn{
-      background:rgba(255,255,255,.15);color:#fff;
-      border:2px solid rgba(255,255,255,.3);border-radius:10px;
-      padding:9px 14px;cursor:pointer;font-weight:700;font-size:14px;
-      min-height:48px;touch-action:manipulation;
-    }
+    .f-btn{background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);
+      border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;font-size:14px;
+      min-height:48px;touch-action:manipulation;}
     .f-btn.active{background:#FFE000;color:#005234;border-color:#FFE000;}
 
-    /* Pitch */
-    .pitch-wrap{
-      position:relative;width:100%;aspect-ratio:3/4;
+    .pitch-wrap{position:relative;width:100%;aspect-ratio:3/4;
       background:linear-gradient(180deg,#1e8a45 0%,#166e37 50%,#1e8a45 100%);
-      border-radius:14px;overflow:hidden;border:2px solid rgba(255,255,255,.4);
-      touch-action:none;
-    }
-    .pitch-wrap::before{
-      content:'';position:absolute;inset:0;
-      background:repeating-linear-gradient(180deg,
-        rgba(0,0,0,.07) 0,rgba(0,0,0,.07) 12.5%,transparent 12.5%,transparent 25%);
-      pointer-events:none;
-    }
+      border-radius:14px;overflow:hidden;border:2px solid rgba(255,255,255,.4);touch-action:none;}
+    .pitch-wrap::before{content:'';position:absolute;inset:0;
+      background:repeating-linear-gradient(180deg,rgba(0,0,0,.07) 0,rgba(0,0,0,.07) 12.5%,transparent 12.5%,transparent 25%);
+      pointer-events:none;}
     .pitch-lines{position:absolute;inset:0;pointer-events:none;}
     .pitch-lines svg{width:100%;height:100%;}
 
-    /* Player token */
-    .player-token{
-      position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;
-      transform:translate(-50%,-50%);z-index:10;
-      padding:8px;cursor:grab;touch-action:none;
-      user-select:none;-webkit-user-select:none;will-change:left,top;
-    }
-    .player-token.dragging{
-      z-index:200;cursor:grabbing;opacity:.92;
-      filter:drop-shadow(0 6px 16px rgba(0,0,0,.7));
-      transform:translate(-50%,-50%) scale(1.15);
-    }
-    .player-avatar{
-      width:58px;height:58px;border-radius:50%;
-      background:#FFE000;border:3px solid #fff;
-      overflow:hidden;display:flex;align-items:center;justify-content:center;
-      font-size:20px;font-weight:900;color:#005234;
-      flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.55);position:relative;
-    }
+    .player-token{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;
+      transform:translate(-50%,-50%);z-index:10;padding:8px;
+      cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;will-change:left,top;}
+    .player-token.dragging{z-index:200;cursor:grabbing;opacity:.92;
+      filter:drop-shadow(0 6px 16px rgba(0,0,0,.7));transform:translate(-50%,-50%) scale(1.15);}
+    .player-avatar{width:58px;height:58px;border-radius:50%;background:#FFE000;
+      border:3px solid #fff;overflow:hidden;display:flex;align-items:center;justify-content:center;
+      font-size:20px;font-weight:900;color:#005234;flex-shrink:0;
+      box-shadow:0 2px 10px rgba(0,0,0,.55);position:relative;}
     .player-avatar img{width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:50%;}
-    .player-name{
-      background:rgba(0,0,0,.85);color:#fff;font-size:11px;font-weight:700;
-      padding:3px 7px;border-radius:6px;
-      white-space:nowrap;max-width:82px;text-align:center;
-      overflow:hidden;text-overflow:ellipsis;
-    }
-    .player-num{
-      position:absolute;bottom:-2px;right:-2px;
-      background:#FFE000;color:#005234;border-radius:50%;
-      width:20px;height:20px;font-size:10px;font-weight:900;
-      display:flex;align-items:center;justify-content:center;
-      border:1.5px solid #005234;
-    }
+    .player-name{background:rgba(0,0,0,.85);color:#fff;font-size:11px;font-weight:700;
+      padding:3px 7px;border-radius:6px;white-space:nowrap;max-width:82px;
+      text-align:center;overflow:hidden;text-overflow:ellipsis;}
+    .player-num{position:absolute;bottom:-2px;right:-2px;background:#FFE000;color:#005234;
+      border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:900;
+      display:flex;align-items:center;justify-content:center;border:1.5px solid #005234;}
 
-    /* Drop overlay */
-    .drop-overlay{
-      display:none;position:absolute;inset:0;
+    .drop-overlay{display:none;position:absolute;inset:0;
       border:3px dashed rgba(255,224,0,.8);border-radius:12px;
-      background:rgba(255,224,0,.08);pointer-events:none;z-index:50;
-    }
+      background:rgba(255,224,0,.08);pointer-events:none;z-index:50;}
     .pitch-wrap.drag-active .drop-overlay{display:block;}
 
-    /* Bench */
     .bench-section{margin-top:16px;}
     .bench-title{font-weight:700;margin-bottom:10px;opacity:.85;font-size:14px;}
-    .bench-scroll{
-      display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;
-      -webkit-overflow-scrolling:touch;
-    }
+    .bench-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;}
     .bench-scroll::-webkit-scrollbar{height:4px;}
     .bench-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.3);border-radius:4px;}
-    .bench-player{
-      display:flex;flex-direction:column;align-items:center;gap:5px;
-      background:rgba(255,255,255,.12);border-radius:12px;
-      padding:10px 12px;cursor:grab;touch-action:none;
-      user-select:none;-webkit-user-select:none;flex-shrink:0;min-width:74px;
-    }
-    .bench-avatar{
-      width:50px;height:50px;border-radius:50%;background:#FFE000;
+    .bench-player{display:flex;flex-direction:column;align-items:center;gap:5px;
+      background:rgba(255,255,255,.12);border-radius:12px;padding:10px 12px;
+      cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;flex-shrink:0;min-width:74px;}
+    .bench-avatar{width:50px;height:50px;border-radius:50%;background:#FFE000;
       border:2px solid rgba(255,255,255,.6);overflow:hidden;
       display:flex;align-items:center;justify-content:center;
-      font-size:16px;font-weight:900;color:#005234;
-      flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.4);
-    }
+      font-size:16px;font-weight:900;color:#005234;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.4);}
     .bench-avatar img{width:100%;height:100%;object-fit:cover;object-position:top center;border-radius:50%;}
     .bench-name{font-size:11px;font-weight:700;text-align:center;max-width:70px;line-height:1.3;}
     .bench-pos{font-size:10px;opacity:.65;text-align:center;}
 
     .zoomHalf{animation:halfZoom 1.8s ease;transform-origin:center;}
     @keyframes halfZoom{0%{transform:scale(1)}40%{transform:scale(1.35)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
-
-    @media(max-width:400px){
-      .player-avatar{width:48px;height:48px;font-size:17px;}
-      .player-name{font-size:10px;max-width:66px;}
-    }
+    @media(max-width:400px){.player-avatar{width:48px;height:48px;font-size:17px;}.player-name{font-size:10px;max-width:66px;}}
   </style>
 </head>
 <body>
-
 <div class="app">
   <div class="overlay"></div>
   <div class="content" id="mainContent">
@@ -209,12 +148,9 @@
 <dialog id="picker">
   <h3 id="pickerTitle">בחר קבוצה</h3>
   <div class="grid" id="grid"></div>
-  <div style="text-align:right;margin-top:10px">
-    <button onclick="picker.close()">סגור</button>
-  </div>
+  <div style="text-align:right;margin-top:10px"><button onclick="picker.close()">סגור</button></div>
 </dialog>
 
-<!-- LINEUP MODAL -->
 <div class="lineup-modal" id="lineupModal">
   <div class="lineup-inner">
     <div class="lineup-header">
@@ -224,9 +160,7 @@
       </div>
       <button class="btn-close-lineup" onclick="closeLineup()">✕ סגור</button>
     </div>
-
     <div class="formation-bar" id="formationBar"></div>
-
     <div class="pitch-wrap" id="pitchWrap">
       <div class="drop-overlay"></div>
       <div class="pitch-lines">
@@ -237,14 +171,11 @@
           <circle cx="50" cy="66" r=".9" fill="rgba(255,255,255,.5)"/>
           <rect x="22" y="1" width="56" height="18" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".6"/>
           <rect x="36" y="1" width="28" height="8" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".5"/>
-          <circle cx="50" cy="14" r=".9" fill="rgba(255,255,255,.4)"/>
           <rect x="22" y="114" width="56" height="18" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".6"/>
           <rect x="36" y="124" width="28" height="8" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".5"/>
-          <circle cx="50" cy="120" r=".9" fill="rgba(255,255,255,.4)"/>
         </svg>
       </div>
     </div>
-
     <div class="bench-section">
       <div class="bench-title">🪑 ספסל — גרור שחקן למגרש להחלפה</div>
       <div class="bench-scroll" id="benchRow"></div>
@@ -278,49 +209,45 @@ const teams=[
 ];
 
 /* ===== MACCABI PLAYERS (2025/26) =====
-   Photos loaded directly from cdn.maccabi-tlv.co.il – the browser fetches them at runtime.
-   We try both jpg variants; onerror falls back to the player's initial.
+   Photos from football.org.il — Israel Football Association.
+   URL: https://www.football.org.il/ImageServer/GetImage.ashx?type=2&id={id}&width=200&height=190
+   IDs collected from search results on football.org.il
 */
-const BASE="https://cdn.maccabi-tlv.co.il/wp-content/uploads";
-function p(num,name,nameEn,pos,yr,slug){
-  return {id:num,num,name,nameEn,pos,
-    photo:`${BASE}/${yr}/07/${slug}.jpg`};
-}
+const FA_IMG = (id) =>
+  `https://www.football.org.il/ImageServer/GetImage.ashx?type=2&id=${id}&width=200&height=190`;
 
-const maccabiPlayers=[
-  /* GK */
-  p(22,"אופק מליקה","Melika","GK","2024","ofek-melika"),
-  p(51,"שליו סעדיה","Saadia","GK","2023","shliv-saadia"),
-  p(90,"רועי משפתי","Mishpati","GK","2023","roei-mishpati"),
-  /* DEF */
-  p(3,"רוי רביבו","Revivo","RB","2024","roi-revivu"),
-  p(4,"הייטור","Heitor","CB","2024","heitor"),
-  p(5,"מוחמד עלי קמארה","Camara","CB","2024","mohamed-ali-camara"),
-  p(6,"טייריס אסנטה","Asante","RB","2024","tyreece-asante"),
-  p(13,"רז שלמה","Shlomo","CB","2024","raz-shlomo"),
-  p(14,"דני גרופר","Gropper","LB","2022","dani-gropper"),
-  p(21,"נועם בן הרוש","Ben Harush","LB","2023","noam-ben-harush"),
-  p(41,"איתי בן חמו","Ben Hamo","CB","2024","itay-ben-hamo"),
-  p(52,"עידן וינברג","Weinberg","CB","2024","idan-weinberg"),
-  /* MID */
-  p(10,"קרווין אנדרדה","Andrade","AM","2024","carwin-andrade"),
-  p(17,"כריסטיאן בליץ׳","Belic","CM","2024","kristijan-belic"),
-  p(23,"בן לדרמן","Lederman","CM","2022","ben-lederman"),
-  p(28,"איסוף סיסוקו","Sissokho","CM","2024","issouf-sissokho"),
-  p(30,"איתמר נוי","Noy","CM","2023","itamar-noi"),
-  p(36,"עידו שחר","Shahar","CM","2024","ido-shahar"),
-  p(42,"דור פרץ","Peretz","CM","2022","dor-peretz"),
-  p(53,"רועי מגור","Magor","CM","2024","roei-magor"),
-  p(59,"לוטם אסרס","Asres","CM","2024","lotem-asres"),
-  /* FWD */
-  p(15,"יונס מלדה","Malede","LW","2024","yones-malede"),
-  p(19,"אלעד מדמון","Madmon","AM","2024","elad-madmon"),
-  p(29,"הליו וארלה","Varela","LW","2024","helio-varela"),
-  p(34,"סייד אבו פרחי","Abu Farhi","ST","2024","saeed-abu-farhi"),
-  p(70,"אמיר סהיטי","Sahiti","ST","2024","amir-sahiti"),
-  p(77,"אושר דוידה","Davida","RW","2024","osher-davida"),
-  p(98,"יון ניקולאסקו","Nicolaescu","ST","2024","ion-nicolaescu"),
-  p(11,"שגיב יחזקאל","Jehezkel","RW","2024","sagiv-yehezkel"),
+// id=0 means no FA photo (foreign players or not yet registered)
+const maccabiPlayers = [
+  // GK
+  {id:1,  num:22, name:"אופק מליקה",       nameEn:"Melika",     pos:"GK", faId:143447},
+  {id:2,  num:90, name:"רועי משפתי",       nameEn:"Mishpati",   pos:"GK", faId:22546},
+  {id:3,  num:51, name:"שליו סעדיה",       nameEn:"Saadia",     pos:"GK", faId:0},
+  // DEF
+  {id:4,  num:3,  name:"רוי רביבו",        nameEn:"Revivo",     pos:"LB", faId:132044},
+  {id:5,  num:4,  name:"הייטור",           nameEn:"Heitor",     pos:"CB", faId:0},
+  {id:6,  num:5,  name:"מוחמד עלי קמארה", nameEn:"Camara",     pos:"CB", faId:0},
+  {id:7,  num:6,  name:"טייריס אסנטה",    nameEn:"Asante",     pos:"RB", faId:0},
+  {id:8,  num:13, name:"רז שלמה",          nameEn:"Shlomo",     pos:"CB", faId:81874},
+  {id:9,  num:14, name:"דני גרופר",        nameEn:"Gropper",    pos:"LB", faId:0},
+  {id:10, num:21, name:"נועם בן הרוש",     nameEn:"Ben Harush", pos:"RB", faId:170994},
+  {id:11, num:41, name:"איתי בן חמו",      nameEn:"Ben Hamo",   pos:"CB", faId:182972},
+  {id:12, num:11, name:"שגיב יחזקאל",      nameEn:"Jehezkel",   pos:"RW", faId:56185},
+  // MID
+  {id:13, num:42, name:"דור פרץ",          nameEn:"Peretz",     pos:"CM", faId:59512},
+  {id:14, num:17, name:"כריסטיאן בליץ׳",  nameEn:"Belic",      pos:"CM", faId:0},
+  {id:15, num:23, name:"בן לדרמן",         nameEn:"Lederman",   pos:"CM", faId:224824},
+  {id:16, num:28, name:"איסוף סיסוקו",     nameEn:"Sissokho",   pos:"CM", faId:0},
+  {id:17, num:30, name:"איתמר נוי",        nameEn:"Noy",        pos:"CM", faId:108004},
+  {id:18, num:36, name:"עידו שחר",         nameEn:"Shahar",     pos:"CM", faId:123490},
+  {id:19, num:10, name:"קרווין אנדרדה",    nameEn:"Andrade",    pos:"AM", faId:0},
+  {id:20, num:77, name:"אושר דוידה",       nameEn:"Davida",     pos:"RW", faId:105732},
+  // FWD
+  {id:21, num:19, name:"אלעד מדמון",       nameEn:"Madmon",     pos:"ST", faId:124295},
+  {id:22, num:98, name:"יון ניקולאסקו",    nameEn:"Nicolaescu", pos:"ST", faId:0},
+  {id:23, num:29, name:"הליו וארלה",       nameEn:"Varela",     pos:"LW", faId:0},
+  {id:24, num:34, name:"סייד אבו פרחי",    nameEn:"Abu Farhi",  pos:"ST", faId:162646},
+  {id:25, num:70, name:"אמיר סהיטי",       nameEn:"Sahiti",     pos:"ST", faId:0},
+  {id:26, num:15, name:"יונס מלדה",        nameEn:"Malede",     pos:"LW", faId:122367},
 ];
 
 /* ===== FORMATIONS ===== */
@@ -332,11 +259,8 @@ const formations={
   "4-3-2-1":[1,4,3,2,1],
   "5-3-2":[1,5,3,2],
 };
-
 let currentFormation="4-3-3";
-let playerPositions={};
-let startingEleven=[];
-let benchPlayerIds=[];
+let playerPositions={},startingEleven=[],benchPlayerIds=[];
 
 /* ===== SCOREBOARD ===== */
 const goalSound=document.getElementById("goalSound");
@@ -345,8 +269,7 @@ const homeScoreEl=document.getElementById("homeScore");
 const awayScoreEl=document.getElementById("awayScore");
 const varStatus=document.getElementById("varStatus");
 const mainContent=document.getElementById("mainContent");
-let lastGoal=null;
-let homeName="קבוצה א׳", awayName="קבוצה ב׳";
+let lastGoal=null, homeName="קבוצה א׳", awayName="קבוצה ב׳";
 
 function playGoal(){try{goalSound.currentTime=0;goalSound.play();}catch(e){}}
 
@@ -355,8 +278,7 @@ awayScoreEl.addEventListener("click",()=>addGoal("away"));
 
 function addGoal(side){
   side==="home"?homeScoreEl.textContent++:awayScoreEl.textContent++;
-  lastGoal=side;varStatus.textContent="VAR: אפשר לבדוק את הגול האחרון";
-  playGoal();
+  lastGoal=side;varStatus.textContent="VAR: אפשר לבדוק את הגול האחרון";playGoal();
 }
 function resetScore(){
   homeScoreEl.textContent=0;awayScoreEl.textContent=0;
@@ -369,9 +291,8 @@ function undoGoal(){
 }
 function runVAR(){
   if(!lastGoal){varStatus.textContent="VAR: אין גול לבדיקה";return;}
-  if(Math.random()<0.5){
-    varStatus.textContent="VAR: ✅ הגול אושר!";
-  }else{
+  if(Math.random()<0.5){varStatus.textContent="VAR: ✅ הגול אושר!";}
+  else{
     varStatus.textContent="VAR: ❌ הגול נפסל!";
     if(lastGoal==="home"&&+homeScoreEl.textContent>0)homeScoreEl.textContent--;
     if(lastGoal==="away"&&+awayScoreEl.textContent>0)awayScoreEl.textContent--;
@@ -380,9 +301,7 @@ function runVAR(){
 }
 function runHalf(){
   try{whistleSound.currentTime=0;whistleSound.play();}catch(e){}
-  mainContent.classList.remove("zoomHalf");
-  void mainContent.offsetWidth;
-  mainContent.classList.add("zoomHalf");
+  mainContent.classList.remove("zoomHalf");void mainContent.offsetWidth;mainContent.classList.add("zoomHalf");
 }
 
 /* ===== TEAM PICKER ===== */
@@ -392,25 +311,21 @@ let pickSide="home";
 
 function isMaccabi(n){return n.includes("מכבי תל אביב");}
 function updateLineupButton(){
-  document.getElementById("lineupBtn").style.display=
-    (isMaccabi(homeName)||isMaccabi(awayName))?"inline-block":"none";
+  document.getElementById("lineupBtn").style.display=(isMaccabi(homeName)||isMaccabi(awayName))?"inline-block":"none";
 }
 
 function openPicker(side){
   pickSide=side;
-  document.getElementById("pickerTitle").textContent=
-    side==="home"?"בחר קבוצה (בית)":"בחר קבוצה (חוץ)";
+  document.getElementById("pickerTitle").textContent=side==="home"?"בחר קבוצה (בית)":"בחר קבוצה (חוץ)";
   grid.innerHTML="";
   teams.forEach(t=>{
-    const d=document.createElement("div");
-    d.className="pick";
+    const d=document.createElement("div");d.className="pick";
     d.innerHTML=`<img src="${t.logo}" loading="lazy"><div>${t.name}</div>`;
     d.onclick=()=>{
       document.getElementById(pickSide+"Logo").src=t.logo;
       document.getElementById(pickSide+"Name").textContent=t.name;
       if(pickSide==="home")homeName=t.name;else awayName=t.name;
-      updateLineupButton();
-      pickerDlg.close();
+      updateLineupButton();pickerDlg.close();
     };
     grid.appendChild(d);
   });
@@ -419,16 +334,13 @@ function openPicker(side){
 
 /* ===== LINEUP ===== */
 function buildFormationButtons(){
-  const bar=document.getElementById("formationBar");
-  bar.innerHTML="";
+  const bar=document.getElementById("formationBar");bar.innerHTML="";
   Object.keys(formations).forEach(k=>{
     const b=document.createElement("button");
-    b.className="f-btn"+(k===currentFormation?" active":"");
-    b.textContent=k;
+    b.className="f-btn"+(k===currentFormation?" active":"");b.textContent=k;
     b.onclick=()=>{
       currentFormation=k;
-      bar.querySelectorAll(".f-btn").forEach(x=>x.classList.remove("active"));
-      b.classList.add("active");
+      bar.querySelectorAll(".f-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");
       buildPitch();
     };
     bar.appendChild(b);
@@ -436,14 +348,10 @@ function buildFormationButtons(){
 }
 
 function getDefaultPositions(key){
-  const lines=formations[key];
-  const n=lines.length;
-  const pos=[];
+  const lines=formations[key],n=lines.length,pos=[];
   lines.forEach((count,li)=>{
     const y=88-(li/(n-1))*76;
-    for(let i=0;i<count;i++){
-      pos.push({x:count===1?50:10+(i/(count-1))*80, y});
-    }
+    for(let i=0;i<count;i++) pos.push({x:count===1?50:10+(i/(count-1))*80,y});
   });
   return pos;
 }
@@ -456,19 +364,16 @@ function assignStarting(){
   const fwds=maccabiPlayers.filter(p=>["ST","LW","RW"].includes(p.pos));
   const lines=formations[currentFormation];
   const picked=[];
-
   function take(pool,n){
     const r=[];
     for(const p of pool)if(!usedIds.has(p.id)&&r.length<n){r.push(p);usedIds.add(p.id);}
     for(const p of maccabiPlayers)if(!usedIds.has(p.id)&&r.length<n){r.push(p);usedIds.add(p.id);}
     return r;
   }
-
   picked.push(...take(gks,lines[0]));
   picked.push(...take(defs,lines[1]));
   lines.slice(2,-1).forEach(c=>picked.push(...take(mids,c)));
   picked.push(...take(fwds,lines[lines.length-1]));
-
   startingEleven=picked.map(p=>p.id);
   benchPlayerIds=maccabiPlayers.filter(p=>!usedIds.has(p.id)).map(p=>p.id);
 }
@@ -478,25 +383,23 @@ function buildPitch(){
   const def=getDefaultPositions(currentFormation);
   playerPositions={};
   startingEleven.forEach((_,i)=>playerPositions[i]=def[i]);
-  renderPitch();
-  renderBench();
+  renderPitch();renderBench();
 }
 
 function getPlayer(id){return maccabiPlayers.find(p=>p.id===id);}
 
 function makeAvatar(player,cls){
-  const div=document.createElement("div");
-  div.className=cls;
-  if(player.photo){
+  const div=document.createElement("div");div.className=cls;
+  if(player.faId){
     const img=document.createElement("img");
     img.loading="lazy";img.alt=player.nameEn;
-    img.src=player.photo;
+    img.src=FA_IMG(player.faId);
     img.onerror=function(){
-      this.remove();
-      div.textContent=player.nameEn.charAt(0).toUpperCase();
+      this.style.display="none";
+      if(!div.textContent) div.textContent=player.nameEn.charAt(0).toUpperCase();
     };
     div.appendChild(img);
-  }else{
+  } else {
     div.textContent=player.nameEn.charAt(0).toUpperCase();
   }
   return div;
@@ -507,19 +410,12 @@ function renderPitch(){
   wrap.querySelectorAll(".player-token").forEach(el=>el.remove());
   startingEleven.forEach((pid,si)=>{
     const p=getPlayer(pid);if(!p)return;
-    const token=document.createElement("div");
-    token.className="player-token";token.dataset.slot=si;
-
+    const token=document.createElement("div");token.className="player-token";token.dataset.slot=si;
     const av=makeAvatar(p,"player-avatar");
-    const nb=document.createElement("div");
-    nb.className="player-num";nb.textContent=p.num;
+    const nb=document.createElement("div");nb.className="player-num";nb.textContent=p.num;
     av.appendChild(nb);
-
-    const nm=document.createElement("div");
-    nm.className="player-name";
-    const parts=p.name.split(" ");
-    nm.textContent=parts.length>1?parts[parts.length-1]:p.name;
-
+    const nm=document.createElement("div");nm.className="player-name";
+    const parts=p.name.split(" ");nm.textContent=parts.length>1?parts[parts.length-1]:p.name;
     token.appendChild(av);token.appendChild(nm);
     const pos=playerPositions[si];
     token.style.left=pos.x+"%";token.style.top=pos.y+"%";
@@ -529,12 +425,10 @@ function renderPitch(){
 }
 
 function renderBench(){
-  const row=document.getElementById("benchRow");
-  row.innerHTML="";
+  const row=document.getElementById("benchRow");row.innerHTML="";
   benchPlayerIds.forEach(pid=>{
     const p=getPlayer(pid);if(!p)return;
-    const el=document.createElement("div");
-    el.className="bench-player";el.dataset.pid=pid;
+    const el=document.createElement("div");el.className="bench-player";el.dataset.pid=pid;
     const av=makeAvatar(p,"bench-avatar");
     const nm=document.createElement("div");nm.className="bench-name";nm.textContent=p.name;
     const ps=document.createElement("div");ps.className="bench-pos";ps.textContent="#"+p.num+" "+p.pos;
@@ -544,12 +438,9 @@ function renderBench(){
   });
 }
 
-/* ===== DRAG HELPERS ===== */
+/* ===== DRAG ===== */
 function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-function getXY(e){
-  const s=e.changedTouches?e.changedTouches[0]:e.touches?e.touches[0]:e;
-  return{x:s.clientX,y:s.clientY};
-}
+function getXY(e){const s=e.changedTouches?e.changedTouches[0]:e.touches?e.touches[0]:e;return{x:s.clientX,y:s.clientY};}
 
 function attachPitchDrag(token,si){
   const wrap=document.getElementById("pitchWrap");
@@ -558,27 +449,19 @@ function attachPitchDrag(token,si){
     token.classList.add("dragging");
     function onMove(ev){
       ev.preventDefault();
-      const{x,y}=getXY(ev);
-      const r=wrap.getBoundingClientRect();
+      const{x,y}=getXY(ev);const r=wrap.getBoundingClientRect();
       const xp=clamp((x-r.left)/r.width*100,4,96);
       const yp=clamp((y-r.top)/r.height*100,4,96);
       token.style.left=xp+"%";token.style.top=yp+"%";
       playerPositions[si]={x:xp,y:yp};
     }
-    function onEnd(){
-      token.classList.remove("dragging");
-      off();
-    }
+    function onEnd(){token.classList.remove("dragging");off();}
     function off(){
-      document.removeEventListener("mousemove",onMove);
-      document.removeEventListener("mouseup",onEnd);
-      document.removeEventListener("touchmove",onMove);
-      document.removeEventListener("touchend",onEnd);
+      document.removeEventListener("mousemove",onMove);document.removeEventListener("mouseup",onEnd);
+      document.removeEventListener("touchmove",onMove);document.removeEventListener("touchend",onEnd);
     }
-    document.addEventListener("mousemove",onMove,{passive:false});
-    document.addEventListener("mouseup",onEnd);
-    document.addEventListener("touchmove",onMove,{passive:false});
-    document.addEventListener("touchend",onEnd);
+    document.addEventListener("mousemove",onMove,{passive:false});document.addEventListener("mouseup",onEnd);
+    document.addEventListener("touchmove",onMove,{passive:false});document.addEventListener("touchend",onEnd);
   }
   token.addEventListener("mousedown",onStart);
   token.addEventListener("touchstart",onStart,{passive:false});
@@ -590,19 +473,13 @@ function attachBenchDrag(el,pid){
     e.preventDefault();
     const{x:sx,y:sy}=getXY(e);
     const ghost=el.cloneNode(true);
-    Object.assign(ghost.style,{
-      position:"fixed",zIndex:"9999",pointerEvents:"none",
-      opacity:"0.92",transform:"scale(1.1) rotate(-2deg)",
-      left:(sx-37)+"px",top:(sy-70)+"px",
-      background:"rgba(0,60,30,.95)",borderRadius:"12px",padding:"10px",
-      boxShadow:"0 8px 24px rgba(0,0,0,.6)"
-    });
+    Object.assign(ghost.style,{position:"fixed",zIndex:"9999",pointerEvents:"none",
+      opacity:"0.92",transform:"scale(1.1) rotate(-2deg)",left:(sx-37)+"px",top:(sy-70)+"px",
+      background:"rgba(0,60,30,.95)",borderRadius:"12px",padding:"10px",boxShadow:"0 8px 24px rgba(0,0,0,.6)"});
     document.body.appendChild(ghost);
     wrap.classList.add("drag-active");
-
     function onMove(ev){
-      ev.preventDefault();
-      const{x,y}=getXY(ev);
+      ev.preventDefault();const{x,y}=getXY(ev);
       ghost.style.left=(x-37)+"px";ghost.style.top=(y-70)+"px";
     }
     function onEnd(ev){
@@ -612,12 +489,10 @@ function attachBenchDrag(el,pid){
       if(fc.clientX<r.left||fc.clientX>r.right||fc.clientY<r.top||fc.clientY>r.bottom)return;
       const xp=clamp((fc.clientX-r.left)/r.width*100,4,96);
       const yp=clamp((fc.clientY-r.top)/r.height*100,4,96);
-      // nearest slot
       let nearest=0,nd=9999;
       startingEleven.forEach((_,i)=>{
         const pp=playerPositions[i];if(!pp)return;
-        const d=Math.hypot(pp.x-xp,pp.y-yp);
-        if(d<nd){nd=d;nearest=i;}
+        const d=Math.hypot(pp.x-xp,pp.y-yp);if(d<nd){nd=d;nearest=i;}
       });
       const swappedId=startingEleven[nearest];
       startingEleven[nearest]=pid;
@@ -627,15 +502,11 @@ function attachBenchDrag(el,pid){
       renderPitch();renderBench();
     }
     function off(){
-      document.removeEventListener("mousemove",onMove);
-      document.removeEventListener("mouseup",onEnd);
-      document.removeEventListener("touchmove",onMove);
-      document.removeEventListener("touchend",onEnd);
+      document.removeEventListener("mousemove",onMove);document.removeEventListener("mouseup",onEnd);
+      document.removeEventListener("touchmove",onMove);document.removeEventListener("touchend",onEnd);
     }
-    document.addEventListener("mousemove",onMove,{passive:false});
-    document.addEventListener("mouseup",onEnd);
-    document.addEventListener("touchmove",onMove,{passive:false});
-    document.addEventListener("touchend",onEnd,{passive:false});
+    document.addEventListener("mousemove",onMove,{passive:false});document.addEventListener("mouseup",onEnd);
+    document.addEventListener("touchmove",onMove,{passive:false});document.addEventListener("touchend",onEnd,{passive:false});
   }
   el.addEventListener("mousedown",onStart);
   el.addEventListener("touchstart",onStart,{passive:false});
@@ -644,8 +515,7 @@ function attachBenchDrag(el,pid){
 function openLineup(){
   document.getElementById("lineupModal").classList.add("open");
   document.body.style.overflow="hidden";
-  buildFormationButtons();
-  buildPitch();
+  buildFormationButtons();buildPitch();
 }
 function closeLineup(){
   document.getElementById("lineupModal").classList.remove("open");
