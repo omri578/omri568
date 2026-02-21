@@ -4,12 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>לוח תוצאות</title>
-
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b5b2a">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700;900&display=swap" rel="stylesheet">
 
   <style>
-    body{margin:0;font-family:Arial;background:#000}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Heebo',Arial,sans-serif;background:#000}
+
+    /* ===== MAIN SCOREBOARD ===== */
     .app{
       min-height:100vh;
       background:url("assets/pitch.png") center/cover no-repeat;
@@ -21,115 +24,219 @@
     }
     .overlay{position:absolute;inset:0;background:rgba(0,0,0,.45)}
     .content{position:relative;z-index:2;width:100%;max-width:900px}
-
-    h1{color:#fff;text-align:center;margin-bottom:16px}
+    h1{color:#fff;text-align:center;margin-bottom:16px;font-weight:900}
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-
-    .team{
-      width:30%;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:8px;
-      cursor:pointer;
-    }
-
-    .logo{
-      width:100px;height:100px;
-      border-radius:18px;
-      overflow:hidden;
-      border:3px solid #fff;
-    }
+    .team{width:30%;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;}
+    .logo{width:100px;height:100px;border-radius:18px;overflow:hidden;border:3px solid #fff;}
     .logo img{width:100%;height:100%;object-fit:cover}
     .name{color:#fff;font-weight:800;text-align:center}
-
-    .scorebox{
-      background:rgba(0,0,0,.7);
-      border-radius:18px;
-      padding:14px 20px;
-      display:flex;
-      align-items:center;
-      gap:16px;
-    }
-
-    .score{
-      color:#fff;
-      font-size:52px;
-      font-weight:900;
-      cursor:pointer;
-      user-select:none;
-    }
-
+    .scorebox{background:rgba(0,0,0,.7);border-radius:18px;padding:14px 20px;display:flex;align-items:center;gap:16px;}
+    .score{color:#fff;font-size:52px;font-weight:900;cursor:pointer;user-select:none;}
     .dash{color:#fff;font-size:36px;font-weight:700}
-
-    .buttons{
-      display:flex;
-      justify-content:center;
-      gap:10px;
-      margin-top:16px;
-      flex-wrap:wrap;
-    }
-
-    button{
-      padding:10px 16px;
-      border:none;
-      border-radius:12px;
-      font-weight:800;
-      cursor:pointer;
-    }
-
+    .buttons{display:flex;justify-content:center;gap:10px;margin-top:16px;flex-wrap:wrap;}
+    button{padding:10px 16px;border:none;border-radius:12px;font-weight:800;cursor:pointer;font-family:'Heebo',Arial,sans-serif;}
     .btn-reset{background:#fff}
     .btn-undo{background:#ffd54a}
     .btn-var{background:#ff7676}
     .btn-half{background:#7ad1ff}
+    .btn-lineup{background:#FFE000;color:#005234;border:2px solid #005234;}
+    .varStatus{color:#fff;text-align:center;margin-top:12px;font-weight:900;background:rgba(0,0,0,.6);padding:8px 12px;border-radius:12px;}
 
-    .varStatus{
+    /* ===== TEAM PICKER DIALOG ===== */
+    dialog{border:none;border-radius:16px;padding:14px;max-width:500px;width:90%;}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;}
+    .pick{border:2px solid #ddd;border-radius:14px;padding:8px;cursor:pointer;text-align:center;background:#fff;}
+    .pick img{width:70px;height:70px;border-radius:14px;object-fit:cover;}
+
+    /* ===== LINEUP MODAL ===== */
+    .lineup-modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:1000;
+      background:rgba(0,0,0,.85);
+      overflow-y:auto;
+      padding:16px;
+    }
+    .lineup-modal.open{display:flex;align-items:flex-start;justify-content:center;}
+    .lineup-inner{
+      background:#005234;
+      border-radius:20px;
+      padding:20px;
+      width:100%;
+      max-width:700px;
       color:#fff;
-      text-align:center;
-      margin-top:12px;
-      font-weight:900;
-      background:rgba(0,0,0,.6);
-      padding:8px 12px;
-      border-radius:12px;
+      position:relative;
     }
-
-    dialog{
-      border:none;
-      border-radius:16px;
-      padding:14px;
-      max-width:500px;
-      width:90%;
+    .lineup-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:16px;
     }
-
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
+    .lineup-title{
+      display:flex;
+      align-items:center;
       gap:10px;
-      margin-top:10px;
+      font-weight:900;
+      font-size:20px;
     }
-
-    .pick{
-      border:2px solid #ddd;
-      border-radius:14px;
-      padding:8px;
+    .lineup-title img{width:40px;height:40px;border-radius:8px;object-fit:cover}
+    .btn-close-lineup{
+      background:rgba(255,255,255,.2);
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      padding:8px 14px;
       cursor:pointer;
-      text-align:center;
-      background:#fff;
+      font-weight:700;
+      font-size:16px;
     }
 
-    .pick img{
-      width:70px;height:70px;
+    /* Formation selector */
+    .formation-bar{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+    }
+    .f-btn{
+      background:rgba(255,255,255,.15);
+      color:#fff;
+      border:2px solid rgba(255,255,255,.3);
+      border-radius:10px;
+      padding:7px 14px;
+      cursor:pointer;
+      font-weight:700;
+      transition:.2s;
+    }
+    .f-btn.active{background:#FFE000;color:#005234;border-color:#FFE000;}
+
+    /* Pitch + drag */
+    .pitch-wrap{
+      position:relative;
+      width:100%;
+      /* aspect ~65:100 for half pitch vertically */
+      aspect-ratio:7/10;
+      background:#1a7a40;
       border-radius:14px;
-      object-fit:cover;
+      overflow:hidden;
+      border:2px solid rgba(255,255,255,.3);
+      touch-action:none;
+    }
+    /* Pitch markings */
+    .pitch-wrap::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,.04) 0, rgba(255,255,255,.04) 1px,
+          transparent 1px, transparent calc(10%)
+        );
+    }
+    .pitch-lines{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+    }
+    .pitch-lines svg{width:100%;height:100%;}
+
+    /* Player token */
+    .player-token{
+      position:absolute;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:3px;
+      cursor:grab;
+      touch-action:none;
+      user-select:none;
+      transform:translate(-50%,-50%);
+      z-index:10;
+    }
+    .player-token.dragging{z-index:100;cursor:grabbing;opacity:.9;}
+    .player-avatar{
+      width:52px;height:52px;
+      border-radius:50%;
+      background:#FFE000;
+      border:3px solid #005234;
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      font-size:20px;
+      font-weight:900;
+      color:#005234;
+      flex-shrink:0;
+    }
+    .player-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+    .player-name{
+      background:rgba(0,0,0,.75);
+      color:#fff;
+      font-size:10px;
+      font-weight:700;
+      padding:2px 6px;
+      border-radius:6px;
+      white-space:nowrap;
+      max-width:80px;
+      text-align:center;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .player-num{
+      position:absolute;
+      top:-4px;right:-4px;
+      background:#FFE000;
+      color:#005234;
+      border-radius:50%;
+      width:18px;height:18px;
+      font-size:10px;
+      font-weight:900;
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid #005234;
     }
 
-    /* ✅ זום למחצית */
-    .zoomHalf{ animation:halfZoom 1.8s ease; transform-origin:center; }
-    @keyframes halfZoom{
-      0%{transform:scale(1)}
-      40%{transform:scale(1.35)}
-      70%{transform:scale(1.25)}
-      100%{transform:scale(1)}
+    /* Bench */
+    .bench-section{margin-top:14px;}
+    .bench-title{font-weight:700;margin-bottom:8px;opacity:.8;font-size:14px;}
+    .bench-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .bench-player{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      background:rgba(255,255,255,.1);
+      border-radius:10px;
+      padding:6px 10px;
+      cursor:grab;
+      touch-action:none;
+      user-select:none;
+    }
+    .bench-avatar{
+      width:34px;height:34px;
+      border-radius:50%;
+      background:#FFE000;
+      border:2px solid #005234;
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:900;color:#005234;
+      flex-shrink:0;
+    }
+    .bench-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+    .bench-info{display:flex;flex-direction:column;}
+    .bench-name{font-size:12px;font-weight:700;}
+    .bench-pos{font-size:10px;opacity:.7;}
+
+    /* Animation zoom half */
+    .zoomHalf{animation:halfZoom 1.8s ease;transform-origin:center;}
+    @keyframes halfZoom{0%{transform:scale(1)}40%{transform:scale(1.35)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+    @media(max-width:480px){
+      .player-avatar{width:42px;height:42px;font-size:16px;}
+      .player-name{font-size:9px;max-width:60px;}
     }
   </style>
 </head>
@@ -137,22 +244,18 @@
 
 <div class="app">
   <div class="overlay"></div>
-
   <div class="content" id="mainContent">
     <h1>לוח תוצאות</h1>
-
     <div class="row">
       <div class="team" onclick="openPicker('home')">
         <div class="logo"><img id="homeLogo" src="assets/team1.png"></div>
         <div class="name" id="homeName">קבוצה א׳</div>
       </div>
-
       <div class="scorebox">
         <div class="score" id="homeScore">0</div>
         <div class="dash">-</div>
         <div class="score" id="awayScore">0</div>
       </div>
-
       <div class="team" onclick="openPicker('away')">
         <div class="logo"><img id="awayLogo" src="assets/team2.png"></div>
         <div class="name" id="awayName">קבוצה ב׳</div>
@@ -164,6 +267,7 @@
       <button class="btn-undo" onclick="undoGoal()">בטל גול</button>
       <button class="btn-var" onclick="runVAR()">VAR</button>
       <button class="btn-half" onclick="runHalf()">מחצית</button>
+      <button class="btn-lineup" id="lineupBtn" onclick="openLineup()" style="display:none">🟡 הרכב מכבי</button>
     </div>
 
     <div class="varStatus" id="varStatus">VAR: אין בדיקה כרגע</div>
@@ -171,9 +275,9 @@
 </div>
 
 <audio id="goalSound" src="assets/goal.mp3"></audio>
-<!-- ✅ שריקת מחצית -->
 <audio id="whistleSound" src="assets/whistle.mp3"></audio>
 
+<!-- Team Picker Dialog -->
 <dialog id="picker">
   <h3 id="pickerTitle">בחר קבוצה</h3>
   <div class="grid" id="grid"></div>
@@ -182,9 +286,50 @@
   </div>
 </dialog>
 
+<!-- LINEUP MODAL -->
+<div class="lineup-modal" id="lineupModal">
+  <div class="lineup-inner">
+    <div class="lineup-header">
+      <div class="lineup-title">
+        <img src="assets/team1.png" id="lineupLogo">
+        <span>הרכב מכבי תל אביב</span>
+      </div>
+      <button class="btn-close-lineup" onclick="closeLineup()">✕ סגור</button>
+    </div>
+
+    <!-- Formation buttons -->
+    <div class="formation-bar" id="formationBar"></div>
+
+    <!-- Pitch -->
+    <div class="pitch-wrap" id="pitchWrap">
+      <div class="pitch-lines">
+        <svg viewBox="0 0 100 143" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- center circle -->
+          <circle cx="50" cy="71.5" r="10" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".6"/>
+          <line x1="0" y1="71.5" x2="100" y2="71.5" stroke="rgba(255,255,255,.35)" stroke-width=".6"/>
+          <!-- penalty areas -->
+          <rect x="22" y="2" width="56" height="20" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".6"/>
+          <rect x="35" y="2" width="30" height="10" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".6"/>
+          <rect x="22" y="121" width="56" height="20" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".6"/>
+          <rect x="35" y="133" width="30" height="10" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".6"/>
+          <!-- outline -->
+          <rect x="1" y="1" width="98" height="141" fill="none" stroke="rgba(255,255,255,.5)" stroke-width=".8"/>
+        </svg>
+      </div>
+      <!-- Players rendered by JS -->
+    </div>
+
+    <!-- Bench -->
+    <div class="bench-section">
+      <div class="bench-title">🪑 ספסל (גרור שחקן למגרש להחלפה)</div>
+      <div class="bench-row" id="benchRow"></div>
+    </div>
+  </div>
+</div>
+
 <script>
+// ====== TEAMS ======
 const teams = [
-  // ישראל
   {name:"מכבי תל אביב", logo:"assets/team1.png"},
   {name:"הפועל תל אביב", logo:"assets/team2.png"},
   {name:"מכבי חיפה", logo:"assets/team3.png"},
@@ -195,8 +340,6 @@ const teams = [
   {name:"פתח תקווה", logo:"assets/pet.png"},
   {name:"מס אשדוד", logo:"assets/Ashdod.png"},
   {name:"הפועל פרדסיה", logo:"assets/par.jpg"},
-
-  // אירופה
   {name:"ריאל מדריד", logo:"assets/real.png"},
   {name:"ברצלונה", logo:"assets/barcelona.png"},
   {name:"פריז סן ז'רמן", logo:"assets/psg.png"},
@@ -209,91 +352,132 @@ const teams = [
   {name:"דורטמונד", logo:"assets/dort.png"}
 ];
 
-const goalSound = document.getElementById("goalSound");
-const whistleSound = document.getElementById("whistleSound");
-const homeScore = document.getElementById("homeScore");
-const awayScore = document.getElementById("awayScore");
-const varStatus = document.getElementById("varStatus");
+// ====== MACCABI PLAYERS (2025/26 season) ======
+// Using Wikipedia/Wikimedia photos via direct URL
+const maccabiPlayers = [
+  // Goalkeepers
+  {id:1, num:22, name:"אופק מליקה", nameEn:"Melika",     pos:"GK", photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Ofek_Melika_%282023%29.jpg/120px-Ofek_Melika_%282023%29.jpg"},
+  {id:2, num:90, name:"רועי משפתי", nameEn:"Mishpati",    pos:"GK", photo:""},
+  {id:3, num:50, name:"שלו סעדיה",  nameEn:"Saadia",      pos:"GK", photo:""},
+  // Defenders
+  {id:4, num:4,  name:"הייטור",     nameEn:"Heitor",      pos:"CB", photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Heitor_Marinho_dos_Santos_%282022%29.jpg/120px-Heitor_Marinho_dos_Santos_%282022%29.jpg"},
+  {id:5, num:5,  name:"ע. קמארה",  nameEn:"Camara",      pos:"CB", photo:""},
+  {id:6, num:6,  name:"טירס אסאנטה",nameEn:"Asante",     pos:"RB", photo:""},
+  {id:7, num:13, name:"רז שלמה",   nameEn:"Shlomo",      pos:"CB", photo:""},
+  {id:8, num:14, name:"דני גרופר", nameEn:"Gropper",     pos:"LB", photo:""},
+  {id:9, num:21, name:"נועם בן הרוש",nameEn:"Ben Harush", pos:"LB", photo:""},
+  {id:10,num:41, name:"איתי בן חמו",nameEn:"Ben Hamo",    pos:"CB", photo:""},
+  {id:11,num:3,  name:"רוי רביבו",  nameEn:"Revivo",      pos:"RB", photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Roy_Revivo_2024.jpg/120px-Roy_Revivo_2024.jpg"},
+  // Midfielders
+  {id:12,num:42, name:"דור פרץ",   nameEn:"Peretz",      pos:"CM", photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Dor_Peretz_%282022%29.jpg/120px-Dor_Peretz_%282022%29.jpg"},
+  {id:13,num:17, name:"קריסטיאן בליץ'",nameEn:"Belić",  pos:"CM", photo:""},
+  {id:14,num:23, name:"בן לדרמן",  nameEn:"Lederman",    pos:"CM", photo:""},
+  {id:15,num:77, name:"אושר דוידה",nameEn:"Davida",      pos:"AM", photo:""},
+  {id:16,num:36, name:"עידו שהר",  nameEn:"Shahar",      pos:"CM", photo:""},
+  {id:17,num:28, name:"איסוף סיסוקו",nameEn:"Sissokho",  pos:"CM", photo:""},
+  {id:18,num:30, name:"איתמר נוי", nameEn:"Noy",         pos:"CM", photo:""},
+  {id:19,num:19, name:"עילאי מדמון",nameEn:"Madmon",     pos:"AM", photo:""},
+  {id:20,num:11, name:"סאגיב ג'חזקל",nameEn:"Jehezkel", pos:"RW", photo:"https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Sagiv_Jehezkel_%282022%29.jpg/120px-Sagiv_Jehezkel_%282022%29.jpg"},
+  // Forwards/Wingers
+  {id:21,num:98, name:"יון ניקולסקו",nameEn:"Nicolaescu",pos:"ST", photo:""},
+  {id:22,num:34, name:"סייד א. פרחי",nameEn:"Abu Farhi", pos:"ST", photo:""},
+  {id:23,num:99, name:"הליו וארלה",nameEn:"Hélio Varela", pos:"LW", photo:""},
+  {id:24,num:7,  name:"יונס מלדה",  nameEn:"Malede",     pos:"LW", photo:""},
+  {id:25,num:9,  name:"אמיר סאהיטי",nameEn:"Sahiti",     pos:"ST", photo:""},
+  {id:26,num:10, name:"קרווין אנדרדה",nameEn:"Andrade",   pos:"AM", photo:""},
+];
+
+// ====== FORMATIONS ======
+const formations = {
+  "4-3-3":  {label:"4-3-3",  lines:[1,4,3,3]},
+  "4-2-3-1":{label:"4-2-3-1",lines:[1,4,2,3,1]},
+  "4-4-2":  {label:"4-4-2",  lines:[1,4,4,2]},
+  "3-5-2":  {label:"3-5-2",  lines:[1,3,5,2]},
+  "4-3-2-1":{label:"4-3-2-1",lines:[1,4,3,2,1]},
+  "5-3-2":  {label:"5-3-2",  lines:[1,5,3,2]},
+};
+
+let currentFormation = "4-3-3";
+// Maps pitch positions [index in starting 11] → {xPct, yPct}
+let playerPositions = {}; // key: slot index, val: {x,y} as percent
+let startingEleven = []; // array of player ids (length 11)
+let benchPlayers = [];
+let dragState = null;
+
+// ====== SCOREBOARD LOGIC ======
+const goalSound   = document.getElementById("goalSound");
+const whistleSound= document.getElementById("whistleSound");
+const homeScoreEl = document.getElementById("homeScore");
+const awayScoreEl = document.getElementById("awayScore");
+const varStatus   = document.getElementById("varStatus");
 const mainContent = document.getElementById("mainContent");
 
-let lastGoal = null; // "home" / "away"
+let lastGoal = null;
+let homeName = "קבוצה א׳", awayName = "קבוצה ב׳";
 
-function playGoal(){
-  try{
-    goalSound.currentTime = 0;
-    goalSound.play();
-  }catch(e){}
-}
+function playGoal(){try{goalSound.currentTime=0;goalSound.play();}catch(e){}}
 
-homeScore.onclick = () => addGoal("home");
-awayScore.onclick = () => addGoal("away");
+homeScoreEl.onclick = () => addGoal("home");
+awayScoreEl.onclick = () => addGoal("away");
 
 function addGoal(side){
-  if(side==="home") homeScore.textContent++;
-  else awayScore.textContent++;
-  lastGoal = side;
-  varStatus.textContent = "VAR: אפשר לבדוק את הגול האחרון";
+  if(side==="home") homeScoreEl.textContent++;
+  else awayScoreEl.textContent++;
+  lastGoal=side;
+  varStatus.textContent="VAR: אפשר לבדוק את הגול האחרון";
   playGoal();
 }
 
 function resetScore(){
-  homeScore.textContent = 0;
-  awayScore.textContent = 0;
-  lastGoal = null;
-  varStatus.textContent = "VAR: אין בדיקה כרגע";
+  homeScoreEl.textContent=0; awayScoreEl.textContent=0;
+  lastGoal=null; varStatus.textContent="VAR: אין בדיקה כרגע";
 }
 
 function undoGoal(){
-  if(lastGoal==="home" && Number(homeScore.textContent)>0){
-    homeScore.textContent--;
-  } else if(lastGoal==="away" && Number(awayScore.textContent)>0){
-    awayScore.textContent--;
-  }
-  lastGoal = null;
-  varStatus.textContent = "VAR: אין בדיקה כרגע";
+  if(lastGoal==="home"&&Number(homeScoreEl.textContent)>0) homeScoreEl.textContent--;
+  else if(lastGoal==="away"&&Number(awayScoreEl.textContent)>0) awayScoreEl.textContent--;
+  lastGoal=null; varStatus.textContent="VAR: אין בדיקה כרגע";
 }
 
 function runVAR(){
-  if(!lastGoal){
-    varStatus.textContent = "VAR: אין גול לבדיקה";
-    return;
+  if(!lastGoal){varStatus.textContent="VAR: אין גול לבדיקה";return;}
+  const approved=Math.random()<0.5;
+  if(approved){varStatus.textContent="VAR: ✅ הגול אושר!";}
+  else{
+    varStatus.textContent="VAR: ❌ הגול נפסל!";
+    if(lastGoal==="home"&&Number(homeScoreEl.textContent)>0) homeScoreEl.textContent--;
+    if(lastGoal==="away"&&Number(awayScoreEl.textContent)>0) awayScoreEl.textContent--;
   }
-
-  const approved = Math.random() < 0.5;
-
-  if(approved){
-    varStatus.textContent = "VAR: ✅ הגול אושר!";
-  } else {
-    varStatus.textContent = "VAR: ❌ הגול נפסל!";
-    if(lastGoal==="home" && Number(homeScore.textContent)>0) homeScore.textContent--;
-    if(lastGoal==="away" && Number(awayScore.textContent)>0) awayScore.textContent--;
-  }
-
-  lastGoal = null;
+  lastGoal=null;
 }
 
-/* ✅ מחצית: שריקה + זום וחזרה */
 function runHalf(){
-  try{
-    whistleSound.currentTime = 0;
-    whistleSound.play();
-  }catch(e){}
-
+  try{whistleSound.currentTime=0;whistleSound.play();}catch(e){}
   mainContent.classList.remove("zoomHalf");
-  void mainContent.offsetWidth; // מאפשר להפעיל שוב אנימציה גם בלחיצה חוזרת
+  void mainContent.offsetWidth;
   mainContent.classList.add("zoomHalf");
 }
 
-const picker = document.getElementById("picker");
-const grid = document.getElementById("grid");
-let pickSide = "home";
+// ====== TEAM PICKER ======
+const picker=document.getElementById("picker");
+const grid=document.getElementById("grid");
+let pickSide="home";
+
+function isMaccabi(name){return name.includes("מכבי תל אביב");}
+
+function updateLineupButton(){
+  const lineupBtn=document.getElementById("lineupBtn");
+  if(isMaccabi(homeName)||isMaccabi(awayName)){
+    lineupBtn.style.display="inline-block";
+  } else {
+    lineupBtn.style.display="none";
+  }
+}
 
 function openPicker(side){
-  pickSide = side;
-  document.getElementById("pickerTitle").textContent =
-    side==="home" ? "בחר קבוצה (בית)" : "בחר קבוצה (חוץ)";
-
-  grid.innerHTML = "";
+  pickSide=side;
+  document.getElementById("pickerTitle").textContent=side==="home"?"בחר קבוצה (בית)":"בחר קבוצה (חוץ)";
+  grid.innerHTML="";
   teams.forEach(t=>{
     const d=document.createElement("div");
     d.className="pick";
@@ -301,18 +485,328 @@ function openPicker(side){
     d.onclick=()=>{
       document.getElementById(pickSide+"Logo").src=t.logo;
       document.getElementById(pickSide+"Name").textContent=t.name;
+      if(pickSide==="home") homeName=t.name;
+      else awayName=t.name;
+      updateLineupButton();
       picker.close();
     };
     grid.appendChild(d);
   });
-
   picker.showModal();
+}
+
+// ====== LINEUP MODAL ======
+function buildFormationButtons(){
+  const bar=document.getElementById("formationBar");
+  bar.innerHTML="";
+  Object.keys(formations).forEach(k=>{
+    const b=document.createElement("button");
+    b.className="f-btn"+(k===currentFormation?" active":"");
+    b.textContent=formations[k].label;
+    b.onclick=()=>{
+      currentFormation=k;
+      bar.querySelectorAll(".f-btn").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      buildPitch();
+    };
+    bar.appendChild(b);
+  });
+}
+
+function getDefaultPositions(formationKey){
+  const lines=formations[formationKey].lines;
+  const positions=[];
+  const totalLines=lines.length;
+  // y: GK near bottom (attack at top from player view)
+  // We map lines[0]=GK bottom, last line = forwards top
+  lines.forEach((count,lineIdx)=>{
+    // lineIdx 0 = GK, highest lineIdx = forwards
+    const yPct = 88 - (lineIdx/(totalLines-1))*76; // 88 down to 12
+    for(let i=0;i<count;i++){
+      const xPct = count===1 ? 50 : 10+(i/(count-1))*80;
+      positions.push({x:xPct, y:yPct});
+    }
+  });
+  return positions; // array of 11 positions
+}
+
+function assignStartingEleven(){
+  // Greedy assign: GK first, then by position
+  const gks=maccabiPlayers.filter(p=>p.pos==="GK");
+  const defs=maccabiPlayers.filter(p=>["CB","RB","LB"].includes(p.pos));
+  const mids=maccabiPlayers.filter(p=>["CM","AM","DM"].includes(p.pos));
+  const fwds=maccabiPlayers.filter(p=>["ST","LW","RW"].includes(p.pos));
+
+  const lines=formations[currentFormation].lines;
+  const gkCount=lines[0]; // always 1
+  const defCount=lines[1];
+  const midCount=lines.slice(2,-1).reduce((a,b)=>a+b,0);
+  const fwdCount=lines[lines.length-1];
+
+  const picked=[];
+  const take=(pool,n)=>{const res=pool.slice(0,n);pool.splice(0,n);return res;};
+  const gkPool=[...gks];
+  const defPool=[...defs];
+  const midPool=[...mids];
+  const fwdPool=[...fwds];
+
+  // Fill from pool, fallback to remaining players
+  const allRemaining=[...maccabiPlayers];
+  function takeOrFallback(pool,n){
+    const taken=take(pool,n);
+    // remove from allRemaining
+    taken.forEach(p=>{const i=allRemaining.findIndex(x=>x.id===p.id);if(i>=0)allRemaining.splice(i,1);});
+    return taken;
+  }
+  const gkSel=takeOrFallback(gkPool,gkCount);
+  const defSel=takeOrFallback(defPool,defCount);
+  // mid lines
+  const midSel=[];
+  lines.slice(2,-1).forEach(c=>{midSel.push(...takeOrFallback(midPool,c));});
+  const fwdSel=takeOrFallback(fwdPool,fwdCount);
+
+  startingEleven=[...gkSel,...defSel,...midSel,...fwdSel].map(p=>p.id);
+
+  // Fill bench with rest
+  benchPlayers=maccabiPlayers.filter(p=>!startingEleven.includes(p.id)).map(p=>p.id);
+}
+
+function buildPitch(){
+  assignStartingEleven();
+  const defaultPos=getDefaultPositions(currentFormation);
+  playerPositions={};
+  startingEleven.forEach((pid,i)=>{playerPositions[i]=defaultPos[i];});
+
+  renderPitch();
+  renderBench();
+}
+
+function getPlayer(id){return maccabiPlayers.find(p=>p.id===id);}
+
+function renderPitch(){
+  const wrap=document.getElementById("pitchWrap");
+  // Remove existing player tokens
+  wrap.querySelectorAll(".player-token").forEach(el=>el.remove());
+
+  startingEleven.forEach((pid,slotIdx)=>{
+    const p=getPlayer(pid);
+    if(!p) return;
+    const pos=playerPositions[slotIdx]||{x:50,y:50};
+    const token=createPlayerToken(p,slotIdx,"pitch");
+    token.style.left=pos.x+"%";
+    token.style.top=pos.y+"%";
+    wrap.appendChild(token);
+    setupDrag(token,slotIdx,"pitch");
+  });
+}
+
+function renderBench(){
+  const benchRow=document.getElementById("benchRow");
+  benchRow.innerHTML="";
+  benchPlayers.forEach(pid=>{
+    const p=getPlayer(pid);
+    if(!p) return;
+    const el=createBenchItem(p);
+    benchRow.appendChild(el);
+    setupDragFromBench(el,p.id);
+  });
+}
+
+function createPlayerToken(player, slotIdx, zone){
+  const div=document.createElement("div");
+  div.className="player-token";
+  div.dataset.slot=slotIdx;
+  div.dataset.zone=zone;
+
+  const avatar=document.createElement("div");
+  avatar.className="player-avatar";
+  if(player.photo){
+    const img=document.createElement("img");
+    img.src=player.photo;
+    img.alt=player.nameEn;
+    img.onerror=()=>{avatar.innerHTML=player.nameEn.charAt(0);};
+    avatar.appendChild(img);
+  } else {
+    avatar.textContent=player.nameEn.charAt(0);
+  }
+
+  const numBadge=document.createElement("div");
+  numBadge.className="player-num";
+  numBadge.textContent=player.num;
+  avatar.appendChild(numBadge);
+
+  const name=document.createElement("div");
+  name.className="player-name";
+  name.textContent=player.name;
+
+  div.appendChild(avatar);
+  div.appendChild(name);
+  return div;
+}
+
+function createBenchItem(player){
+  const div=document.createElement("div");
+  div.className="bench-player";
+  div.dataset.pid=player.id;
+
+  const avatar=document.createElement("div");
+  avatar.className="bench-avatar";
+  if(player.photo){
+    const img=document.createElement("img");
+    img.src=player.photo;
+    img.alt=player.nameEn;
+    img.onerror=()=>{avatar.innerHTML=player.nameEn.charAt(0);};
+    avatar.appendChild(img);
+  } else {
+    avatar.textContent=player.nameEn.charAt(0);
+  }
+
+  const info=document.createElement("div");
+  info.className="bench-info";
+  const nm=document.createElement("div");
+  nm.className="bench-name";
+  nm.textContent=player.name;
+  const ps=document.createElement("div");
+  ps.className="bench-pos";
+  ps.textContent="#"+player.num+" · "+player.pos;
+  info.appendChild(nm);
+  info.appendChild(ps);
+
+  div.appendChild(avatar);
+  div.appendChild(info);
+  return div;
+}
+
+// ====== DRAG & DROP (touch + mouse) ======
+function setupDrag(token, slotIdx, zone){
+  const wrap=document.getElementById("pitchWrap");
+
+  function getEventXY(e){
+    if(e.touches) return {x:e.touches[0].clientX, y:e.touches[0].clientY};
+    return {x:e.clientX, y:e.clientY};
+  }
+
+  function onStart(e){
+    e.preventDefault();
+    token.classList.add("dragging");
+    const {x,y}=getEventXY(e);
+    dragState={type:"pitch",slotIdx,startX:x,startY:y};
+
+    function onMove(ev){
+      if(!dragState) return;
+      ev.preventDefault();
+      const {x:cx,y:cy}=getEventXY(ev);
+      const rect=wrap.getBoundingClientRect();
+      const xPct=Math.max(5,Math.min(95,((cx-rect.left)/rect.width)*100));
+      const yPct=Math.max(5,Math.min(95,((cy-rect.top)/rect.height)*100));
+      token.style.left=xPct+"%";
+      token.style.top=yPct+"%";
+      playerPositions[slotIdx]={x:xPct,y:yPct};
+    }
+
+    function onEnd(){
+      token.classList.remove("dragging");
+      dragState=null;
+      document.removeEventListener("mousemove",onMove);
+      document.removeEventListener("mouseup",onEnd);
+      document.removeEventListener("touchmove",onMove);
+      document.removeEventListener("touchend",onEnd);
+    }
+
+    document.addEventListener("mousemove",onMove,{passive:false});
+    document.addEventListener("mouseup",onEnd);
+    document.addEventListener("touchmove",onMove,{passive:false});
+    document.addEventListener("touchend",onEnd);
+  }
+
+  token.addEventListener("mousedown",onStart);
+  token.addEventListener("touchstart",onStart,{passive:false});
+}
+
+function setupDragFromBench(benchEl, pid){
+  const wrap=document.getElementById("pitchWrap");
+
+  function getEventXY(e){
+    if(e.touches) return {x:e.touches[0].clientX, y:e.touches[0].clientY};
+    return {x:e.clientX, y:e.clientY};
+  }
+
+  function onStart(e){
+    e.preventDefault();
+    const {x,y}=getEventXY(e);
+
+    // Create ghost
+    const ghost=benchEl.cloneNode(true);
+    ghost.style.cssText="position:fixed;z-index:9999;pointer-events:none;opacity:0.85;transform:scale(1.1);";
+    ghost.style.left=(x-30)+"px";
+    ghost.style.top=(y-30)+"px";
+    document.body.appendChild(ghost);
+
+    function onMove(ev){
+      ev.preventDefault();
+      const {x:cx,y:cy}=getEventXY(ev);
+      ghost.style.left=(cx-30)+"px";
+      ghost.style.top=(cy-30)+"px";
+    }
+
+    function onEnd(ev){
+      ghost.remove();
+      const {x:cx,y:cy}=getEventXY(ev)||getEventXY({clientX:cx,clientY:cy});
+      // Check if dropped on pitch
+      const rect=wrap.getBoundingClientRect();
+      const fc=ev.changedTouches?ev.changedTouches[0]:ev;
+      const dropX=fc.clientX, dropY=fc.clientY;
+      if(dropX>=rect.left&&dropX<=rect.right&&dropY>=rect.top&&dropY<=rect.bottom){
+        // Swap with nearest slot or just put in last open
+        const xPct=((dropX-rect.left)/rect.width)*100;
+        const yPct=((dropY-rect.top)/rect.height)*100;
+        // find nearest slot
+        let nearest=0,nearDist=9999;
+        startingEleven.forEach((_,i)=>{
+          const pos=playerPositions[i];
+          if(!pos) return;
+          const d=Math.hypot(pos.x-xPct,pos.y-yPct);
+          if(d<nearDist){nearDist=d;nearest=i;}
+        });
+        // Swap bench player with slot
+        const swappedId=startingEleven[nearest];
+        startingEleven[nearest]=pid;
+        benchPlayers=benchPlayers.filter(x=>x!==pid);
+        benchPlayers.push(swappedId);
+        playerPositions[nearest]={x:xPct,y:yPct};
+        renderPitch();
+        renderBench();
+      }
+
+      document.removeEventListener("mousemove",onMove);
+      document.removeEventListener("mouseup",onEnd);
+      document.removeEventListener("touchmove",onMove);
+      document.removeEventListener("touchend",onEnd);
+    }
+
+    document.addEventListener("mousemove",onMove,{passive:false});
+    document.addEventListener("mouseup",onEnd);
+    document.addEventListener("touchmove",onMove,{passive:false});
+    document.addEventListener("touchend",onEnd,{passive:false});
+  }
+
+  benchEl.addEventListener("mousedown",onStart);
+  benchEl.addEventListener("touchstart",onStart,{passive:false});
+}
+
+function openLineup(){
+  document.getElementById("lineupModal").classList.add("open");
+  buildFormationButtons();
+  buildPitch();
+}
+
+function closeLineup(){
+  document.getElementById("lineupModal").classList.remove("open");
 }
 
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
 </script>
-
 </body>
 </html>
