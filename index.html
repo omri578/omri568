@@ -123,7 +123,7 @@
       object-fit:cover;
     }
 
-    /* ✅ אנימציית זום למחצית */
+    /* ✅ זום למחצית */
     .zoomHalf{ animation:halfZoom 1.8s ease; transform-origin:center; }
     @keyframes halfZoom{
       0%{transform:scale(1)}
@@ -171,6 +171,7 @@
 </div>
 
 <audio id="goalSound" src="assets/goal.mp3"></audio>
+<!-- ✅ שריקת מחצית -->
 <audio id="whistleSound" src="assets/whistle.mp3"></audio>
 
 <dialog id="picker">
@@ -182,7 +183,6 @@
 </dialog>
 
 <script>
-/* ✅ זה החלק שחסר קודם! */
 const teams = [
   // ישראל
   {name:"מכבי תל אביב", logo:"assets/team1.png"},
@@ -219,7 +219,10 @@ const mainContent = document.getElementById("mainContent");
 let lastGoal = null; // "home" / "away"
 
 function playGoal(){
-  try{ goalSound.currentTime = 0; goalSound.play(); }catch(e){}
+  try{
+    goalSound.currentTime = 0;
+    goalSound.play();
+  }catch(e){}
 }
 
 homeScore.onclick = () => addGoal("home");
@@ -241,8 +244,11 @@ function resetScore(){
 }
 
 function undoGoal(){
-  if(lastGoal==="home" && Number(homeScore.textContent)>0) homeScore.textContent--;
-  else if(lastGoal==="away" && Number(awayScore.textContent)>0) awayScore.textContent--;
+  if(lastGoal==="home" && Number(homeScore.textContent)>0){
+    homeScore.textContent--;
+  } else if(lastGoal==="away" && Number(awayScore.textContent)>0){
+    awayScore.textContent--;
+  }
   lastGoal = null;
   varStatus.textContent = "VAR: אין בדיקה כרגע";
 }
@@ -262,38 +268,39 @@ function runVAR(){
     if(lastGoal==="home" && Number(homeScore.textContent)>0) homeScore.textContent--;
     if(lastGoal==="away" && Number(awayScore.textContent)>0) awayScore.textContent--;
   }
+
   lastGoal = null;
 }
 
-/* ✅ כפתור מחצית */
+/* ✅ מחצית: שריקה + זום וחזרה */
 function runHalf(){
-  try{ whistleSound.currentTime = 0; whistleSound.play(); }catch(e){}
+  try{
+    whistleSound.currentTime = 0;
+    whistleSound.play();
+  }catch(e){}
 
-  // להפעיל אנימציה גם אם לוחצים שוב ושוב
   mainContent.classList.remove("zoomHalf");
-  void mainContent.offsetWidth;
+  void mainContent.offsetWidth; // מאפשר להפעיל שוב אנימציה גם בלחיצה חוזרת
   mainContent.classList.add("zoomHalf");
 }
 
-/* picker */
 const picker = document.getElementById("picker");
 const grid = document.getElementById("grid");
 let pickSide = "home";
 
 function openPicker(side){
   pickSide = side;
-
   document.getElementById("pickerTitle").textContent =
     side==="home" ? "בחר קבוצה (בית)" : "בחר קבוצה (חוץ)";
 
   grid.innerHTML = "";
   teams.forEach(t=>{
-    const d = document.createElement("div");
-    d.className = "pick";
-    d.innerHTML = `<img src="${t.logo}"><div>${t.name}</div>`;
-    d.onclick = ()=>{
-      document.getElementById(pickSide+"Logo").src = t.logo;
-      document.getElementById(pickSide+"Name").textContent = t.name;
+    const d=document.createElement("div");
+    d.className="pick";
+    d.innerHTML=`<img src="${t.logo}"><div>${t.name}</div>`;
+    d.onclick=()=>{
+      document.getElementById(pickSide+"Logo").src=t.logo;
+      document.getElementById(pickSide+"Name").textContent=t.name;
       picker.close();
     };
     grid.appendChild(d);
