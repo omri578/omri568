@@ -82,7 +82,6 @@
     .btn-undo{background:#ffd54a}
     .btn-var{background:#ff7676}
     .btn-half{background:#7ad1ff}
-    .btn-lineup{background:#b6ff7a}
 
     .varStatus{
       color:#fff;
@@ -98,8 +97,8 @@
       border:none;
       border-radius:16px;
       padding:14px;
-      max-width:700px;
-      width:92%;
+      max-width:500px;
+      width:90%;
     }
 
     .grid{
@@ -131,128 +130,6 @@
       40%{transform:scale(1.35)}
       70%{transform:scale(1.25)}
       100%{transform:scale(1)}
-    }
-
-    /* ====== מסך הרכבים ====== */
-    .lineupTop{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-bottom:10px;
-    }
-    .tag{
-      background:#111;
-      color:#fff;
-      padding:8px 10px;
-      border-radius:10px;
-      font-weight:900;
-    }
-
-    .formationRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-    .formationBtn{
-      background:#fff;
-      border:2px solid #222;
-      border-radius:12px;
-      padding:10px 12px;
-      font-weight:900;
-      cursor:pointer;
-    }
-
-    .editorWrap{
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
-
-    .miniPitch{
-      width:360px;
-      max-width:100%;
-      aspect-ratio: 2 / 3;
-      background:linear-gradient(#0b5b2a,#0a4d24);
-      border-radius:18px;
-      border:3px solid #fff;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .miniPitch:before{
-      content:"";
-      position:absolute; inset:14px;
-      border:2px solid rgba(255,255,255,.8);
-      border-radius:14px;
-    }
-
-    .spot{
-      position:absolute;
-      transform:translate(-50%,-50%);
-      min-width:90px;
-      max-width:130px;
-      background:rgba(0,0,0,.65);
-      color:#fff;
-      padding:6px 8px;
-      border-radius:12px;
-      border:2px solid rgba(255,255,255,.85);
-      font-weight:900;
-      text-align:center;
-      font-size:12px;
-      user-select:none;
-      cursor:grab;
-    }
-
-    .bench{
-      flex:1;
-      min-width:240px;
-      background:#f7f7f7;
-      border-radius:16px;
-      padding:10px;
-      border:2px solid #ddd;
-    }
-    .benchTitle{font-weight:900;margin-bottom:8px}
-
-    .player{
-      display:inline-block;
-      margin:6px;
-      padding:8px 10px;
-      background:#111;
-      color:#fff;
-      border-radius:12px;
-      font-weight:900;
-      cursor:grab;
-      user-select:none;
-      font-size:12px;
-    }
-
-    .hint{
-      margin-top:8px;
-      font-size:12px;
-      color:#222;
-      font-weight:700;
-    }
-
-    /* ✅ חובה לטאצ' */
-    .player, .spot { touch-action: none; }
-
-    .dragGhost{
-      position:fixed;
-      z-index:99999;
-      pointer-events:none;
-      background:#111;
-      color:#fff;
-      padding:10px 12px;
-      border-radius:14px;
-      font-weight:900;
-      font-size:12px;
-      transform:translate(-50%,-50%);
-      opacity:.92;
-      box-shadow:0 8px 24px rgba(0,0,0,.35);
     }
   </style>
 </head>
@@ -287,11 +164,6 @@
       <button class="btn-undo" onclick="undoGoal()">בטל גול</button>
       <button class="btn-var" onclick="runVAR()">VAR</button>
       <button class="btn-half" onclick="runHalf()">מחצית</button>
-
-      <!-- יופיע רק כשמכבי תל אביב נבחרה בבית או בחוץ -->
-      <button class="btn-lineup" id="maccabiLineupBtn" onclick="openMaccabiLineup()" style="display:none">
-        הרכב מכבי
-      </button>
     </div>
 
     <div class="varStatus" id="varStatus">VAR: אין בדיקה כרגע</div>
@@ -299,6 +171,7 @@
 </div>
 
 <audio id="goalSound" src="assets/goal.mp3"></audio>
+<!-- ✅ שריקת מחצית -->
 <audio id="whistleSound" src="assets/whistle.mp3"></audio>
 
 <dialog id="picker">
@@ -309,44 +182,7 @@
   </div>
 </dialog>
 
-<!-- מסך הרכבים -->
-<dialog id="lineupDialog">
-  <div class="lineupTop">
-    <div class="tag" id="lineupTeamTag">הרכב: מכבי תל אביב</div>
-    <div class="tag" id="lineupSideTag">צד: בית</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button onclick="resetLineup()">נקה עמדות</button>
-      <button onclick="showFormationScreen()">החלף מערך</button>
-      <button onclick="lineupDialog.close()">סגור</button>
-    </div>
-  </div>
-
-  <div id="formationScreen">
-    <div style="font-weight:900">בחר מערך:</div>
-    <div class="formationRow">
-      <button class="formationBtn" onclick="chooseFormation('4-3-3')">4-3-3</button>
-      <button class="formationBtn" onclick="chooseFormation('4-4-2')">4-4-2</button>
-      <button class="formationBtn" onclick="chooseFormation('4-2-3-1')">4-2-3-1</button>
-      <button class="formationBtn" onclick="chooseFormation('3-5-2')">3-5-2</button>
-    </div>
-    <div class="hint">טאצ׳: לוחצים על שחקן/עמדה, גוררים ומשחררים.</div>
-  </div>
-
-  <div id="editorScreen" style="display:none">
-    <div class="editorWrap">
-      <div class="miniPitch" id="miniPitch"></div>
-
-      <div class="bench">
-        <div class="benchTitle">שחקנים (גרור למגרש)</div>
-        <div id="benchPlayers"></div>
-        <div class="hint">אפשר לגרור גם שחקן שכבר על המגרש לעמדה אחרת.</div>
-      </div>
-    </div>
-  </div>
-</dialog>
-
 <script>
-/* ================== קבוצות ================== */
 const teams = [
   // ישראל
   {name:"מכבי תל אביב", logo:"assets/team1.png"},
@@ -373,7 +209,6 @@ const teams = [
   {name:"דורטמונד", logo:"assets/dort.png"}
 ];
 
-/* ================== לוח תוצאות ================== */
 const goalSound = document.getElementById("goalSound");
 const whistleSound = document.getElementById("whistleSound");
 const homeScore = document.getElementById("homeScore");
@@ -381,14 +216,13 @@ const awayScore = document.getElementById("awayScore");
 const varStatus = document.getElementById("varStatus");
 const mainContent = document.getElementById("mainContent");
 
-const homeNameEl = document.getElementById("homeName");
-const awayNameEl = document.getElementById("awayName");
-const maccabiLineupBtn = document.getElementById("maccabiLineupBtn");
-
-let lastGoal = null;
+let lastGoal = null; // "home" / "away"
 
 function playGoal(){
-  try{ goalSound.currentTime = 0; goalSound.play(); }catch(e){}
+  try{
+    goalSound.currentTime = 0;
+    goalSound.play();
+  }catch(e){}
 }
 
 homeScore.onclick = () => addGoal("home");
@@ -410,8 +244,11 @@ function resetScore(){
 }
 
 function undoGoal(){
-  if(lastGoal==="home" && Number(homeScore.textContent)>0) homeScore.textContent--;
-  else if(lastGoal==="away" && Number(awayScore.textContent)>0) awayScore.textContent--;
+  if(lastGoal==="home" && Number(homeScore.textContent)>0){
+    homeScore.textContent--;
+  } else if(lastGoal==="away" && Number(awayScore.textContent)>0){
+    awayScore.textContent--;
+  }
   lastGoal = null;
   varStatus.textContent = "VAR: אין בדיקה כרגע";
 }
@@ -431,17 +268,22 @@ function runVAR(){
     if(lastGoal==="home" && Number(homeScore.textContent)>0) homeScore.textContent--;
     if(lastGoal==="away" && Number(awayScore.textContent)>0) awayScore.textContent--;
   }
+
   lastGoal = null;
 }
 
+/* ✅ מחצית: שריקה + זום וחזרה */
 function runHalf(){
-  try{ whistleSound.currentTime = 0; whistleSound.play(); }catch(e){}
+  try{
+    whistleSound.currentTime = 0;
+    whistleSound.play();
+  }catch(e){}
+
   mainContent.classList.remove("zoomHalf");
-  void mainContent.offsetWidth;
+  void mainContent.offsetWidth; // מאפשר להפעיל שוב אנימציה גם בלחיצה חוזרת
   mainContent.classList.add("zoomHalf");
 }
 
-/* ================== Picker ================== */
 const picker = document.getElementById("picker");
 const grid = document.getElementById("grid");
 let pickSide = "home";
@@ -460,7 +302,6 @@ function openPicker(side){
       document.getElementById(pickSide+"Logo").src=t.logo;
       document.getElementById(pickSide+"Name").textContent=t.name;
       picker.close();
-      updateMaccabiButton();
     };
     grid.appendChild(d);
   });
@@ -468,214 +309,9 @@ function openPicker(side){
   picker.showModal();
 }
 
-function updateMaccabiButton(){
-  const home = homeNameEl.textContent.trim();
-  const away = awayNameEl.textContent.trim();
-  const isMaccabi = (home === "מכבי תל אביב") || (away === "מכבי תל אביב");
-  maccabiLineupBtn.style.display = isMaccabi ? "inline-block" : "none";
-}
-
-/* ================== מסך הרכבים (טאצ' + עברית) ================== */
-const lineupDialog = document.getElementById("lineupDialog");
-const formationScreen = document.getElementById("formationScreen");
-const editorScreen = document.getElementById("editorScreen");
-const lineupSideTag = document.getElementById("lineupSideTag");
-const miniPitch = document.getElementById("miniPitch");
-const benchPlayers = document.getElementById("benchPlayers");
-
-let maccabiSide = "home";
-let currentFormation = null;
-
-/* ✅ כאן תכתוב את השמות העדכניים שלך + עמדות בעברית
-   (כרגע זו רשימה לדוגמה—תחליף לשמות שאתה רוצה) */
-const maccabiPlayers = [
-  {name:"שחקן 1", pos:"שוער"},
-  {name:"שחקן 2", pos:"בלם"},
-  {name:"שחקן 3", pos:"בלם"},
-  {name:"שחקן 4", pos:"מגן ימני"},
-  {name:"שחקן 5", pos:"מגן שמאלי"},
-  {name:"שחקן 6", pos:"קשר אחורי"},
-  {name:"שחקן 7", pos:"קשר מרכזי"},
-  {name:"שחקן 8", pos:"קשר מרכזי"},
-  {name:"שחקן 9", pos:"קיצוני ימין"},
-  {name:"שחקן 10", pos:"קיצוני שמאל"},
-  {name:"שחקן 11", pos:"חלוץ"}
-];
-
-/* ✅ מערכים עם תוויות בעברית */
-const formations = {
-  "4-3-3": [
-    {x:50,y:88,label:"שוער"},
-    {x:20,y:72,label:"מגן ימני"}, {x:40,y:74,label:"בלם"}, {x:60,y:74,label:"בלם"}, {x:80,y:72,label:"מגן שמאלי"},
-    {x:30,y:55,label:"קשר מרכזי"}, {x:50,y:58,label:"קשר מרכזי"}, {x:70,y:55,label:"קשר מרכזי"},
-    {x:22,y:32,label:"קיצוני ימין"}, {x:50,y:28,label:"חלוץ"}, {x:78,y:32,label:"קיצוני שמאל"}
-  ],
-  "4-4-2": [
-    {x:50,y:88,label:"שוער"},
-    {x:20,y:72,label:"מגן ימני"}, {x:40,y:74,label:"בלם"}, {x:60,y:74,label:"בלם"}, {x:80,y:72,label:"מגן שמאלי"},
-    {x:20,y:52,label:"קשר ימין"}, {x:40,y:56,label:"קשר מרכזי"}, {x:60,y:56,label:"קשר מרכזי"}, {x:80,y:52,label:"קשר שמאל"},
-    {x:42,y:28,label:"חלוץ"}, {x:58,y:28,label:"חלוץ"}
-  ],
-  "4-2-3-1": [
-    {x:50,y:88,label:"שוער"},
-    {x:20,y:72,label:"מגן ימני"}, {x:40,y:74,label:"בלם"}, {x:60,y:74,label:"בלם"}, {x:80,y:72,label:"מגן שמאלי"},
-    {x:40,y:58,label:"קשר אחורי"}, {x:60,y:58,label:"קשר אחורי"},
-    {x:25,y:40,label:"קיצוני ימין"}, {x:50,y:42,label:"קשר התקפי"}, {x:75,y:40,label:"קיצוני שמאל"},
-    {x:50,y:26,label:"חלוץ"}
-  ],
-  "3-5-2": [
-    {x:50,y:88,label:"שוער"},
-    {x:35,y:74,label:"בלם"}, {x:50,y:76,label:"בלם"}, {x:65,y:74,label:"בלם"},
-    {x:18,y:52,label:"ווינגבק ימין"}, {x:40,y:58,label:"קשר מרכזי"}, {x:50,y:56,label:"קשר מרכזי"}, {x:60,y:58,label:"קשר מרכזי"}, {x:82,y:52,label:"ווינגבק שמאל"},
-    {x:44,y:28,label:"חלוץ"}, {x:56,y:28,label:"חלוץ"}
-  ]
-};
-
-function openMaccabiLineup(){
-  const home = homeNameEl.textContent.trim();
-  const away = awayNameEl.textContent.trim();
-
-  if(home === "מכבי תל אביב") maccabiSide = "home";
-  else if(away === "מכבי תל אביב") maccabiSide = "away";
-  else return;
-
-  lineupSideTag.textContent = "צד: " + (maccabiSide==="home" ? "בית" : "חוץ");
-  showFormationScreen();
-  lineupDialog.showModal();
-}
-
-function showFormationScreen(){
-  formationScreen.style.display = "block";
-  editorScreen.style.display = "none";
-}
-
-function chooseFormation(f){
-  currentFormation = f;
-  formationScreen.style.display = "none";
-  editorScreen.style.display = "block";
-  buildEditor();
-}
-
-/* ---- Drag system for Mouse + Touch (Pointer Events) ---- */
-let dragState = null; // {name, fromIndex, ghost, pointerId}
-
-function createGhost(text, x, y){
-  const g = document.createElement("div");
-  g.className = "dragGhost";
-  g.textContent = text;
-  g.style.left = x + "px";
-  g.style.top  = y + "px";
-  document.body.appendChild(g);
-  return g;
-}
-
-function startDrag(name, pointerId, x, y, fromIndex=null){
-  if(dragState?.ghost) dragState.ghost.remove();
-  const ghost = createGhost(name, x, y);
-  dragState = { name, fromIndex, ghost, pointerId };
-}
-
-function moveDrag(x, y){
-  if(!dragState) return;
-  dragState.ghost.style.left = x + "px";
-  dragState.ghost.style.top  = y + "px";
-}
-
-function endDrag(x, y){
-  if(!dragState) return;
-
-  const el = document.elementFromPoint(x, y);
-  const spot = el?.classList?.contains("spot") ? el : el?.closest?.(".spot");
-
-  if(spot){
-    if(typeof dragState.fromIndex === "number"){
-      const from = miniPitch.querySelector(`.spot[data-index="${dragState.fromIndex}"]`);
-      if(from){
-        delete from.dataset.playerName;
-        from.textContent = from.dataset.label;
-      }
-    }
-    spot.dataset.playerName = dragState.name;
-    spot.textContent = dragState.name;
-  }
-
-  dragState.ghost.remove();
-  dragState = null;
-}
-
-function attachPointerDrag(el, getNameFn, getFromIndexFn){
-  el.addEventListener("pointerdown", (e)=>{
-    const name = getNameFn();
-    if(!name) return;
-    e.preventDefault();
-    el.setPointerCapture(e.pointerId);
-    startDrag(name, e.pointerId, e.clientX, e.clientY, getFromIndexFn ? getFromIndexFn() : null);
-  });
-
-  el.addEventListener("pointermove", (e)=>{
-    if(dragState?.pointerId !== e.pointerId) return;
-    moveDrag(e.clientX, e.clientY);
-  });
-
-  el.addEventListener("pointerup", (e)=>{
-    if(dragState?.pointerId !== e.pointerId) return;
-    endDrag(e.clientX, e.clientY);
-  });
-
-  el.addEventListener("pointercancel", (e)=>{
-    if(dragState?.pointerId !== e.pointerId) return;
-    endDrag(e.clientX, e.clientY);
-  });
-}
-
-function buildEditor(){
-  // Bench players
-  benchPlayers.innerHTML = "";
-  maccabiPlayers.forEach(pl=>{
-    const p = document.createElement("div");
-    p.className = "player";
-    p.textContent = `${pl.pos} - ${pl.name}`;
-    attachPointerDrag(p, ()=>pl.name, null);
-    benchPlayers.appendChild(p);
-  });
-
-  // Pitch spots
-  miniPitch.innerHTML = "";
-  const spots = formations[currentFormation] || [];
-  spots.forEach((s, idx)=>{
-    const spot = document.createElement("div");
-    spot.className = "spot";
-    spot.style.left = s.x + "%";
-    spot.style.top  = s.y + "%";
-    spot.dataset.index = String(idx);
-    spot.dataset.label = s.label;
-    spot.textContent = s.label;
-
-    attachPointerDrag(
-      spot,
-      ()=>spot.dataset.playerName || null,
-      ()=>idx
-    );
-
-    miniPitch.appendChild(spot);
-  });
-}
-
-function resetLineup(){
-  const spots = miniPitch.querySelectorAll(".spot");
-  spots.forEach(s=>{
-    delete s.dataset.playerName;
-    s.textContent = s.dataset.label;
-  });
-}
-
-/* ================== Service Worker ================== */
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
-
-/* בדיקה ראשונית לכפתור מכבי */
-updateMaccabiButton();
 </script>
 
 </body>
