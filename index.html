@@ -82,6 +82,7 @@
     .btn-undo{background:#ffd54a}
     .btn-var{background:#ff7676}
     .btn-half{background:#7ad1ff}
+    .btn-lineup{background:#b6ff7a}
 
     .varStatus{
       color:#fff;
@@ -97,8 +98,8 @@
       border:none;
       border-radius:16px;
       padding:14px;
-      max-width:500px;
-      width:90%;
+      max-width:700px;
+      width:92%;
     }
 
     .grid{
@@ -130,6 +131,109 @@
       40%{transform:scale(1.35)}
       70%{transform:scale(1.25)}
       100%{transform:scale(1)}
+    }
+
+    /* ====== מסך הרכבים ====== */
+    .lineupTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .tag{
+      background:#111;
+      color:#fff;
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:900;
+    }
+
+    .formationRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .formationBtn{
+      background:#fff;
+      border:2px solid #222;
+      border-radius:12px;
+      padding:10px 12px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .editorWrap{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .miniPitch{
+      width:360px;
+      max-width:100%;
+      aspect-ratio: 2 / 3;
+      background:linear-gradient(#0b5b2a,#0a4d24);
+      border-radius:18px;
+      border:3px solid #fff;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .miniPitch:before{
+      content:"";
+      position:absolute; inset:14px;
+      border:2px solid rgba(255,255,255,.8);
+      border-radius:14px;
+    }
+
+    .spot{
+      position:absolute;
+      transform:translate(-50%,-50%);
+      min-width:84px;
+      max-width:120px;
+      background:rgba(0,0,0,.65);
+      color:#fff;
+      padding:6px 8px;
+      border-radius:12px;
+      border:2px solid rgba(255,255,255,.85);
+      font-weight:900;
+      text-align:center;
+      font-size:12px;
+      user-select:none;
+    }
+
+    .bench{
+      flex:1;
+      min-width:240px;
+      background:#f7f7f7;
+      border-radius:16px;
+      padding:10px;
+      border:2px solid #ddd;
+    }
+    .benchTitle{font-weight:900;margin-bottom:8px}
+
+    .player{
+      display:inline-block;
+      margin:6px;
+      padding:8px 10px;
+      background:#111;
+      color:#fff;
+      border-radius:12px;
+      font-weight:900;
+      cursor:grab;
+      user-select:none;
+      font-size:12px;
+    }
+
+    .hint{
+      margin-top:8px;
+      font-size:12px;
+      color:#222;
+      font-weight:700;
     }
   </style>
 </head>
@@ -164,6 +268,11 @@
       <button class="btn-undo" onclick="undoGoal()">בטל גול</button>
       <button class="btn-var" onclick="runVAR()">VAR</button>
       <button class="btn-half" onclick="runHalf()">מחצית</button>
+
+      <!-- ✅ יופיע רק כשמכבי תל אביב משחקת בבית/חוץ -->
+      <button class="btn-lineup" id="maccabiLineupBtn" onclick="openMaccabiLineup()" style="display:none">
+        הרכב מכבי
+      </button>
     </div>
 
     <div class="varStatus" id="varStatus">VAR: אין בדיקה כרגע</div>
@@ -171,7 +280,6 @@
 </div>
 
 <audio id="goalSound" src="assets/goal.mp3"></audio>
-<!-- ✅ שריקת מחצית -->
 <audio id="whistleSound" src="assets/whistle.mp3"></audio>
 
 <dialog id="picker">
@@ -182,7 +290,46 @@
   </div>
 </dialog>
 
+<!-- ✅ מסך הרכבים -->
+<dialog id="lineupDialog">
+  <div class="lineupTop">
+    <div class="tag" id="lineupTeamTag">הרכב: מכבי תל אביב</div>
+    <div class="tag" id="lineupSideTag">צד: בית</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="resetLineup()">נקה עמדות</button>
+      <button onclick="showFormationScreen()">החלף מערך</button>
+      <button onclick="lineupDialog.close()">סגור</button>
+    </div>
+  </div>
+
+  <!-- מסך בחירת מערך -->
+  <div id="formationScreen">
+    <div style="font-weight:900">בחר מערך:</div>
+    <div class="formationRow">
+      <button class="formationBtn" onclick="chooseFormation('4-3-3')">4-3-3</button>
+      <button class="formationBtn" onclick="chooseFormation('4-4-2')">4-4-2</button>
+      <button class="formationBtn" onclick="chooseFormation('4-2-3-1')">4-2-3-1</button>
+      <button class="formationBtn" onclick="chooseFormation('3-5-2')">3-5-2</button>
+    </div>
+    <div class="hint">אחרי בחירה ייפתח מגרש קטן. תגרור שחקנים לספוטים.</div>
+  </div>
+
+  <!-- מסך עריכה (גרירה למגרש) -->
+  <div id="editorScreen" style="display:none">
+    <div class="editorWrap">
+      <div class="miniPitch" id="miniPitch"></div>
+
+      <div class="bench">
+        <div class="benchTitle">ספסל שחקנים (גרור למגרש)</div>
+        <div id="benchPlayers"></div>
+        <div class="hint">טיפ: אפשר גם לגרור שחקן מספוט לספוט אחר.</div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
 <script>
+/* קבוצות */
 const teams = [
   // ישראל
   {name:"מכבי תל אביב", logo:"assets/team1.png"},
@@ -209,6 +356,7 @@ const teams = [
   {name:"דורטמונד", logo:"assets/dort.png"}
 ];
 
+/* ====== לוח תוצאות ====== */
 const goalSound = document.getElementById("goalSound");
 const whistleSound = document.getElementById("whistleSound");
 const homeScore = document.getElementById("homeScore");
@@ -216,13 +364,14 @@ const awayScore = document.getElementById("awayScore");
 const varStatus = document.getElementById("varStatus");
 const mainContent = document.getElementById("mainContent");
 
-let lastGoal = null; // "home" / "away"
+const homeNameEl = document.getElementById("homeName");
+const awayNameEl = document.getElementById("awayName");
+const maccabiLineupBtn = document.getElementById("maccabiLineupBtn");
+
+let lastGoal = null;
 
 function playGoal(){
-  try{
-    goalSound.currentTime = 0;
-    goalSound.play();
-  }catch(e){}
+  try{ goalSound.currentTime = 0; goalSound.play(); }catch(e){}
 }
 
 homeScore.onclick = () => addGoal("home");
@@ -244,11 +393,8 @@ function resetScore(){
 }
 
 function undoGoal(){
-  if(lastGoal==="home" && Number(homeScore.textContent)>0){
-    homeScore.textContent--;
-  } else if(lastGoal==="away" && Number(awayScore.textContent)>0){
-    awayScore.textContent--;
-  }
+  if(lastGoal==="home" && Number(homeScore.textContent)>0) homeScore.textContent--;
+  else if(lastGoal==="away" && Number(awayScore.textContent)>0) awayScore.textContent--;
   lastGoal = null;
   varStatus.textContent = "VAR: אין בדיקה כרגע";
 }
@@ -268,22 +414,18 @@ function runVAR(){
     if(lastGoal==="home" && Number(homeScore.textContent)>0) homeScore.textContent--;
     if(lastGoal==="away" && Number(awayScore.textContent)>0) awayScore.textContent--;
   }
-
   lastGoal = null;
 }
 
-/* ✅ מחצית: שריקה + זום וחזרה */
+/* מחצית: שריקה + זום */
 function runHalf(){
-  try{
-    whistleSound.currentTime = 0;
-    whistleSound.play();
-  }catch(e){}
-
+  try{ whistleSound.currentTime = 0; whistleSound.play(); }catch(e){}
   mainContent.classList.remove("zoomHalf");
-  void mainContent.offsetWidth; // מאפשר להפעיל שוב אנימציה גם בלחיצה חוזרת
+  void mainContent.offsetWidth;
   mainContent.classList.add("zoomHalf");
 }
 
+/* ====== בחירת קבוצות ====== */
 const picker = document.getElementById("picker");
 const grid = document.getElementById("grid");
 let pickSide = "home";
@@ -302,6 +444,7 @@ function openPicker(side){
       document.getElementById(pickSide+"Logo").src=t.logo;
       document.getElementById(pickSide+"Name").textContent=t.name;
       picker.close();
+      updateMaccabiButton();
     };
     grid.appendChild(d);
   });
@@ -309,9 +452,205 @@ function openPicker(side){
   picker.showModal();
 }
 
+function updateMaccabiButton(){
+  const home = homeNameEl.textContent.trim();
+  const away = awayNameEl.textContent.trim();
+  const isMaccabi = (home === "מכבי תל אביב") || (away === "מכבי תל אביב");
+  maccabiLineupBtn.style.display = isMaccabi ? "inline-block" : "none";
+}
+
+/* ====== מסך הרכבים (מכבי) ====== */
+const lineupDialog = document.getElementById("lineupDialog");
+const formationScreen = document.getElementById("formationScreen");
+const editorScreen = document.getElementById("editorScreen");
+const lineupSideTag = document.getElementById("lineupSideTag");
+const miniPitch = document.getElementById("miniPitch");
+const benchPlayers = document.getElementById("benchPlayers");
+
+let maccabiSide = "home";     // "home" / "away"
+let currentFormation = null;
+
+// רשימת שחקנים לדוגמה (אפשר לשנות שמות איך שבא לך)
+const maccabiPlayers = [
+  { name: "אופק מליקה", pos: "שוער" },
+  { name: "רועי משפתי", pos: "שוער" },
+
+  { name: "רוי רביבו", pos: "מגן שמאלי" },
+  { name: "דני גרופר", pos: "מגן שמאלי" },
+  { name: "נועם בן הרוש", pos: "מגן ימני" },
+
+  { name: "רז שלמה", pos: "בלם" },
+  { name: "מוחמד קמארה", pos: "בלם" },
+  { name: "טייריס אסאנטה", pos: "בלם" },
+  { name: "הייטור", pos: "בלם" },
+  { name: "איתי בן חמו", pos: "בלם" },
+
+  { name: "קריסטיאן בליץ'", pos: "קשר אחורי" },
+  { name: "איסוף סיסוקו", pos: "קשר אחורי" },
+  { name: "בן לידרמן", pos: "קשר אחורי" },
+
+  { name: "דור פרץ", pos: "קשר מרכזי" },
+  { name: "עידו שחר", pos: "קשר מרכזי" },
+
+  { name: "קרבין אנדראדה", pos: "קשר התקפי" },
+  { name: "איתמר נוי", pos: "קשר התקפי" },
+
+  { name: "אושר דוידה", pos: "קיצוני ימין" },
+  { name: "אמיר סהאיטי", pos: "קיצוני ימין" },
+  { name: "שגיב יחזקאל", pos: "קיצוני ימין" },
+
+  { name: "הליו וארלה", pos: "קיצוני שמאל" },
+
+  { name: "יון ניקולאסקו", pos: "חלוץ" },
+  { name: "אלעד מדמון", pos: "חלוץ" },
+  { name: "יונס מלדה", pos: "חלוץ" },
+  { name: "סעיד אבו פרחי", pos: "חלוץ" },
+  { name: "אילאי בן שמעון", pos: "חלוץ" }
+];
+// מיקומים לכל מערך (באחוזים של המגרש הקטן)
+const formations = {
+  "4-3-3": [
+    {x:50,y:88,label:"GK"},
+    {x:20,y:72,label:"RB"}, {x:40,y:74,label:"CB"}, {x:60,y:74,label:"CB"}, {x:80,y:72,label:"LB"},
+    {x:30,y:55,label:"CM"}, {x:50,y:58,label:"CM"}, {x:70,y:55,label:"CM"},
+    {x:22,y:32,label:"RW"}, {x:50,y:28,label:"ST"}, {x:78,y:32,label:"LW"}
+  ],
+  "4-4-2": [
+    {x:50,y:88,label:"GK"},
+    {x:20,y:72,label:"RB"}, {x:40,y:74,label:"CB"}, {x:60,y:74,label:"CB"}, {x:80,y:72,label:"LB"},
+    {x:20,y:52,label:"RM"}, {x:40,y:56,label:"CM"}, {x:60,y:56,label:"CM"}, {x:80,y:52,label:"LM"},
+    {x:42,y:28,label:"ST"}, {x:58,y:28,label:"ST"}
+  ],
+  "4-2-3-1": [
+    {x:50,y:88,label:"GK"},
+    {x:20,y:72,label:"RB"}, {x:40,y:74,label:"CB"}, {x:60,y:74,label:"CB"}, {x:80,y:72,label:"LB"},
+    {x:40,y:58,label:"DM"}, {x:60,y:58,label:"DM"},
+    {x:25,y:40,label:"RW"}, {x:50,y:42,label:"CAM"}, {x:75,y:40,label:"LW"},
+    {x:50,y:26,label:"ST"}
+  ],
+  "3-5-2": [
+    {x:50,y:88,label:"GK"},
+    {x:35,y:74,label:"CB"}, {x:50,y:76,label:"CB"}, {x:65,y:74,label:"CB"},
+    {x:18,y:52,label:"RWB"}, {x:40,y:58,label:"CM"}, {x:50,y:56,label:"CM"}, {x:60,y:58,label:"CM"}, {x:82,y:52,label:"LWB"},
+    {x:44,y:28,label:"ST"}, {x:56,y:28,label:"ST"}
+  ]
+};
+
+function openMaccabiLineup(){
+  const home = homeNameEl.textContent.trim();
+  const away = awayNameEl.textContent.trim();
+
+  if(home === "מכבי תל אביב") maccabiSide = "home";
+  else if(away === "מכבי תל אביב") maccabiSide = "away";
+  else return;
+
+  lineupSideTag.textContent = "צד: " + (maccabiSide==="home" ? "בית" : "חוץ");
+
+  showFormationScreen();
+  lineupDialog.showModal();
+}
+
+function showFormationScreen(){
+  formationScreen.style.display = "block";
+  editorScreen.style.display = "none";
+}
+
+function chooseFormation(f){
+  currentFormation = f;
+  formationScreen.style.display = "none";
+  editorScreen.style.display = "block";
+  buildEditor();
+}
+
+function buildEditor(){
+  // בונה שחקנים בספסל
+  benchPlayers.innerHTML = "";
+ maccabiPlayers.forEach(pl=>{
+  const p = document.createElement("div");
+  p.className = "player";
+  p.textContent = `${pl.pos} - ${pl.name}`;
+  p.draggable = true;
+
+  p.addEventListener("dragstart", (e)=>{
+    e.dataTransfer.setData("text/plain", JSON.stringify({
+      type: "bench",
+      name: pl.name,
+      pos: pl.pos
+    }));
+  });
+
+  benchPlayers.appendChild(p);
+});
+
+  // בונה ספוטים על המגרש לפי המערך
+  miniPitch.innerHTML = "";
+  const spots = formations[currentFormation] || [];
+  spots.forEach((s, idx)=>{
+    const spot = document.createElement("div");
+    spot.className = "spot";
+    spot.style.left = s.x + "%";
+    spot.style.top  = s.y + "%";
+    spot.dataset.index = String(idx);
+    spot.dataset.label = s.label;
+    spot.textContent = s.label; // בהתחלה מציג תפקיד, ואז נכניס שם שחקן
+
+    // מאפשר לגרור גם מתוך ספוט
+    spot.draggable = true;
+    spot.addEventListener("dragstart", (e)=>{
+      const hasPlayer = spot.dataset.playerName;
+      if(!hasPlayer) return;
+      e.dataTransfer.setData("text/plain", JSON.stringify({
+        type:"spot",
+        fromIndex: idx,
+        name: hasPlayer
+      }));
+    });
+
+    // לאפשר DROP לתוך הספוט
+    spot.addEventListener("dragover", (e)=> e.preventDefault());
+    spot.addEventListener("drop", (e)=>{
+      e.preventDefault();
+      const data = safeParse(e.dataTransfer.getData("text/plain"));
+      if(!data || !data.name) return;
+
+      // אם גררו מספוט אחר – לנקות את המקור
+      if(data.type === "spot" && typeof data.fromIndex === "number"){
+        const from = miniPitch.querySelector(`.spot[data-index="${data.fromIndex}"]`);
+        if(from){
+          delete from.dataset.playerName;
+          from.textContent = from.dataset.label;
+        }
+      }
+
+      // לשים שחקן בספוט הנוכחי
+      spot.dataset.playerName = data.name;
+      spot.textContent = data.name;
+    });
+
+    miniPitch.appendChild(spot);
+  });
+}
+
+function resetLineup(){
+  // נקה רק את העמדות (לא משנה מערך)
+  const spots = miniPitch.querySelectorAll(".spot");
+  spots.forEach(s=>{
+    delete s.dataset.playerName;
+    s.textContent = s.dataset.label;
+  });
+}
+
+function safeParse(t){
+  try{ return JSON.parse(t); }catch(e){ return null; }
+}
+
+/* Service Worker */
 if("serviceWorker" in navigator){
   navigator.serviceWorker.register("sw.js");
 }
+
+/* להבטיח שכפתור מכבי יופיע נכון כבר מההתחלה (אם החלפת ידנית שמות) */
+updateMaccabiButton();
 </script>
 
 </body>
