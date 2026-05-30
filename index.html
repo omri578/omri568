@@ -109,9 +109,56 @@
     .zoomHalf{animation:halfZoom 1.8s ease;transform-origin:center;}
     @keyframes halfZoom{0%{transform:scale(1)}40%{transform:scale(1.35)}70%{transform:scale(1.25)}100%{transform:scale(1)}}
     @media(max-width:400px){.player-avatar{width:48px;height:48px;font-size:17px;}.player-name{font-size:10px;max-width:66px;}}
+
+    /* ===== INTRO SCREEN ===== */
+    #introScreen{
+      position:fixed;inset:0;z-index:9999;
+      background:#000;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    #introBg{
+      position:absolute;inset:0;
+      background:url("assets/a.avif") center/cover no-repeat;
+      z-index:0;
+    }
+    #introBgOverlay{
+      position:absolute;inset:0;
+      background:rgba(0,0,0,.35);
+      z-index:1;
+    }
+    #introVideo{
+      position:relative;z-index:2;
+      width:100%;max-width:860px;
+      border-radius:18px;
+      box-shadow:0 0 60px rgba(0,0,0,.8);
+      display:block;
+    }
+    #introSkip{
+      position:absolute;bottom:28px;right:28px;z-index:10;
+      background:rgba(255,255,255,.18);color:#fff;
+      border:2px solid rgba(255,255,255,.45);
+      border-radius:12px;padding:10px 22px;
+      font-family:'Heebo',Arial,sans-serif;font-size:15px;font-weight:700;
+      cursor:pointer;backdrop-filter:blur(6px);
+      transition:background .2s;
+    }
+    #introSkip:hover{background:rgba(255,255,255,.32);}
+    #introScreen.hidden{display:none;}
   </style>
 </head>
 <body>
+
+<!-- ===== INTRO SCREEN (PSG vs Arsenal) ===== -->
+<div id="introScreen" class="hidden">
+  <div id="introBg"></div>
+  <div id="introBgOverlay"></div>
+  <video id="introVideo" autoplay playsinline muted>
+    <source src="assets/intro.mp4" type="video/mp4">
+  </video>
+  <button id="introSkip" onclick="closeIntro()">דלג ›</button>
+</div>
+
 <div class="app">
   <div class="overlay"></div>
   <div class="content" id="mainContent">
@@ -207,25 +254,45 @@ const teams=[
   {name:"יובנטוס",logo:"assets/juve.png"},
   {name:"בייראן מינכן",logo:"assets/muc.png"},
   {name:"צ'לסי",logo:"assets/Chelsea_crest.png"},
-  {name:"דורטמונד",logo:"assets/dort.png"}
+  {name:"דורטמונד",logo:"assets/dort.png"},
   {name:"ארסנל",logo:"assets/ars.png"}
 ];
 
-/* ===== MACCABI PLAYERS (2025/26) =====
-   Photos from football.org.il — Israel Football Association.
-   URL: https://www.football.org.il/ImageServer/GetImage.ashx?type=2&id={id}&width=200&height=190
-   IDs collected from search results on football.org.il
-*/
+/* ===== INTRO LOGIC ===== */
+const PSG_NAME   = "פריז סן ז'רמן";
+const ARSENAL_NAME = "ארסנל";
+
+function isPsgArsenal(){
+  const h = document.getElementById("homeName").textContent;
+  const a = document.getElementById("awayName").textContent;
+  const names = [h, a];
+  return names.includes(PSG_NAME) && names.includes(ARSENAL_NAME);
+}
+
+function showIntro(){
+  const screen = document.getElementById("introScreen");
+  const vid    = document.getElementById("introVideo");
+  screen.classList.remove("hidden");
+  vid.currentTime = 0;
+  vid.muted = false; // try with sound; browser may block — fallback below
+  vid.play().catch(()=>{ vid.muted = true; vid.play(); });
+  vid.onended = closeIntro;
+}
+
+function closeIntro(){
+  const screen = document.getElementById("introScreen");
+  screen.classList.add("hidden");
+  document.getElementById("introVideo").pause();
+}
+
+/* ===== MACCABI PLAYERS (2025/26) ===== */
 const FA_IMG = (id) =>
   `https://www.football.org.il/ImageServer/GetImage.ashx?type=2&id=${id}&width=200&height=190`;
 
-// id=0 means no FA photo (foreign players or not yet registered)
 const maccabiPlayers = [
-  // GK
   {id:1,  num:22, name:"אופק מליקה",       nameEn:"Melika",     pos:"GK", faId:143447},
   {id:2,  num:90, name:"רועי משפתי",       nameEn:"Mishpati",   pos:"GK", faId:22546},
   {id:3,  num:51, name:"שליו סעדיה",       nameEn:"Saadia",     pos:"GK", faId:0},
-  // DEF
   {id:4,  num:3,  name:"רוי רביבו",        nameEn:"Revivo",     pos:"LB", faId:132044},
   {id:5,  num:4,  name:"הייטור",           nameEn:"Heitor",     pos:"CB", faId:0},
   {id:6,  num:5,  name:"מוחמד עלי קמארה", nameEn:"Camara",     pos:"CB", faId:0},
@@ -235,7 +302,6 @@ const maccabiPlayers = [
   {id:10, num:21, name:"נועם בן הרוש",     nameEn:"Ben Harush", pos:"RB", faId:170994},
   {id:11, num:41, name:"איתי בן חמו",      nameEn:"Ben Hamo",   pos:"CB", faId:182972},
   {id:12, num:11, name:"שגיב יחזקאל",      nameEn:"Jehezkel",   pos:"RW", faId:56185},
-  // MID
   {id:13, num:42, name:"דור פרץ",          nameEn:"Peretz",     pos:"CM", faId:59512},
   {id:14, num:17, name:"כריסטיאן בליץ׳",  nameEn:"Belic",      pos:"CM", faId:0},
   {id:15, num:23, name:"בן לדרמן",         nameEn:"Lederman",   pos:"CM", faId:224824},
@@ -244,7 +310,6 @@ const maccabiPlayers = [
   {id:18, num:36, name:"עידו שחר",         nameEn:"Shahar",     pos:"CM", faId:123490},
   {id:19, num:10, name:"קרווין אנדרדה",    nameEn:"Andrade",    pos:"AM", faId:0},
   {id:20, num:77, name:"אושר דוידה",       nameEn:"Davida",     pos:"RW", faId:105732},
-  // FWD
   {id:21, num:19, name:"אלעד מדמון",       nameEn:"Madmon",     pos:"ST", faId:124295},
   {id:22, num:98, name:"יון ניקולאסקו",    nameEn:"Nicolaescu", pos:"ST", faId:0},
   {id:23, num:29, name:"הליו וארלה",       nameEn:"Varela",     pos:"LW", faId:0},
@@ -327,8 +392,11 @@ function openPicker(side){
     d.onclick=()=>{
       document.getElementById(pickSide+"Logo").src=t.logo;
       document.getElementById(pickSide+"Name").textContent=t.name;
-      if(pickSide==="home")homeName=t.name;else awayName=t.name;
-      updateLineupButton();pickerDlg.close();
+      if(pickSide==="home") homeName=t.name; else awayName=t.name;
+      updateLineupButton();
+      pickerDlg.close();
+      // ── הפעל פתיח אם נבחרו פריז סן ז'רמן + ארסנל ──
+      if(isPsgArsenal()) showIntro();
     };
     grid.appendChild(d);
   });
@@ -529,4 +597,3 @@ if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
 </script>
 </body>
 </html>
-
