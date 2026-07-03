@@ -18,7 +18,7 @@
     h1{color:#fff;text-align:center;margin-bottom:16px;font-weight:900}
     .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .team{width:30%;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;}
-    .logo{width:100px;height:100px;border-radius:18px;overflow:hidden;border:3px solid #fff;}
+    .logo{width:100px;height:100px;border-radius:18px;overflow:hidden;border:3px solid #fff;background:#fff;display:flex;align-items:center;justify-content:center;}
     .logo img{width:100%;height:100%;object-fit:cover}
     .name{color:#fff;font-weight:800;text-align:center}
     .scorebox{background:rgba(0,0,0,.7);border-radius:18px;padding:14px 20px;display:flex;align-items:center;gap:16px;}
@@ -29,6 +29,7 @@
       font-family:'Heebo',Arial,sans-serif;touch-action:manipulation;min-height:46px;}
     .btn-reset{background:#fff}.btn-undo{background:#ffd54a}.btn-var{background:#ff7676}
     .btn-half{background:#7ad1ff}
+    .btn-worldcup{background:#d4af37;color:#000;}
     .btn-lineup{background:#FFE000;color:#005234;border:2px solid #005234;font-size:15px;display:none;}
     .varStatus{color:#fff;text-align:center;margin-top:12px;font-weight:900;
       background:rgba(0,0,0,.6);padding:8px 12px;border-radius:12px;}
@@ -149,13 +150,10 @@
 </head>
 <body>
 
-<!-- ===== INTRO SCREEN (PSG vs Arsenal) ===== -->
 <div id="introScreen" class="hidden">
   <div id="introBg"></div>
   <div id="introBgOverlay"></div>
-  <video id="introVideo" autoplay playsinline muted>
-    <source src="assets/intro.mp4" type="video/mp4">
-  </video>
+  <video id="introVideo" autoplay playsinline muted src="assets/intro.mp4"></video>
   <button id="introSkip" onclick="closeIntro()">דלג ›</button>
 </div>
 
@@ -183,6 +181,7 @@
       <button class="btn-undo" onclick="undoGoal()">בטל גול</button>
       <button class="btn-var" onclick="runVAR()">VAR</button>
       <button class="btn-half" onclick="runHalf()">מחצית</button>
+      <button class="btn-worldcup" onclick="startWorldCupMode()">🏆 מצב מונדיאל</button>
       <button class="btn-lineup" id="lineupBtn" onclick="openLineup()">🟡 הרכב מכבי</button>
     </div>
     <div class="varStatus" id="varStatus">VAR: אין בדיקה כרגע</div>
@@ -258,6 +257,30 @@ const teams=[
   {name:"ארסנל",logo:"assets/ars.png"}
 ];
 
+/* ===== NATIONAL TEAMS (מצב מונדיאל) ===== */
+let isWorldCupMode = false;
+const nationalTeams = [
+  {name:"קנדה", logo:"https://flagcdn.com/w160/ca.png"},
+  {name:"מרוקו", logo:"https://flagcdn.com/w160/ma.png"},
+  {name:"פרגוואי", logo:"https://flagcdn.com/w160/py.png"},
+  {name:"צרפת", logo:"https://flagcdn.com/w160/fr.png"},
+  {name:"ברזיל", logo:"https://flagcdn.com/w160/br.png"},
+  {name:"נורווגיה", logo:"https://flagcdn.com/w160/no.png"},
+  {name:"מקסיקו", logo:"https://flagcdn.com/w160/mx.png"},
+  {name:"אנגליה", logo:"https://flagcdn.com/w160/gb-eng.png"},
+  {name:"פורטוגל", logo:"https://flagcdn.com/w160/pt.png"},
+  {name:"ספרד", logo:"https://flagcdn.com/w160/es.png"},
+  {name:"ארצות הברית", logo:"https://flagcdn.com/w160/us.png"},
+  {name:"בלגיה", logo:"https://flagcdn.com/w160/be.png"},
+  {name:"שווייץ", logo:"https://flagcdn.com/w160/ch.png"},
+  {name:"ארגנטינה", logo:"https://flagcdn.com/w160/ar.png"},
+  {name:"כף ורדה", logo:"https://flagcdn.com/w160/cv.png"},
+  {name:"אוסטרליה", logo:"https://flagcdn.com/w160/au.png"},
+  {name:"מצרים", logo:"https://flagcdn.com/w160/eg.png"},
+  {name:"קולומביה", logo:"https://flagcdn.com/w160/co.png"},
+  {name:"גאנה", logo:"https://flagcdn.com/w160/gh.png"}
+];
+
 /* ===== INTRO LOGIC ===== */
 const PSG_NAME   = "פריז סן ז'רמן";
 const ARSENAL_NAME = "ארסנל";
@@ -272,9 +295,22 @@ function isPsgArsenal(){
 function showIntro(){
   const screen = document.getElementById("introScreen");
   const vid    = document.getElementById("introVideo");
+  vid.src = "assets/intro.mp4"; 
   screen.classList.remove("hidden");
   vid.currentTime = 0;
-  vid.muted = false; // try with sound; browser may block — fallback below
+  vid.muted = false; 
+  vid.play().catch(()=>{ vid.muted = true; vid.play(); });
+  vid.onended = closeIntro;
+}
+
+function startWorldCupMode(){
+  isWorldCupMode = true;
+  const screen = document.getElementById("introScreen");
+  const vid    = document.getElementById("introVideo");
+  vid.src = "assets/world.mp4"; 
+  screen.classList.remove("hidden");
+  vid.currentTime = 0;
+  vid.muted = false;
   vid.play().catch(()=>{ vid.muted = true; vid.play(); });
   vid.onended = closeIntro;
 }
@@ -294,16 +330,16 @@ const maccabiPlayers = [
   {id:2,  num:90, name:"רועי משפתי",       nameEn:"Mishpati",   pos:"GK", faId:22546},
   {id:3,  num:51, name:"שליו סעדיה",       nameEn:"Saadia",     pos:"GK", faId:0},
   {id:4,  num:3,  name:"רוי רביבו",        nameEn:"Revivo",     pos:"LB", faId:132044},
-  {id:5,  num:4,  name:"הייטור",           nameEn:"Heitor",     pos:"CB", faId:0},
-  {id:6,  num:5,  name:"מוחמד עלי קמארה", nameEn:"Camara",     pos:"CB", faId:0},
-  {id:7,  num:6,  name:"טייריס אסנטה",    nameEn:"Asante",     pos:"RB", faId:0},
+  {id:5,  num:4,  name:"הייטור",            nameEn:"Heitor",     pos:"CB", faId:0},
+  {id:6,  num:5,  name:"מוחמד עלי קמארה", nameEn:"Camara",      pos:"CB", faId:0},
+  {id:7,  num:6,  name:"טייריס אסנטה",     nameEn:"Asante",     pos:"RB", faId:0},
   {id:8,  num:13, name:"רז שלמה",          nameEn:"Shlomo",     pos:"CB", faId:81874},
   {id:9,  num:14, name:"דני גרופר",        nameEn:"Gropper",    pos:"LB", faId:0},
   {id:10, num:21, name:"נועם בן הרוש",     nameEn:"Ben Harush", pos:"RB", faId:170994},
   {id:11, num:41, name:"איתי בן חמו",      nameEn:"Ben Hamo",   pos:"CB", faId:182972},
   {id:12, num:11, name:"שגיב יחזקאל",      nameEn:"Jehezkel",   pos:"RW", faId:56185},
   {id:13, num:42, name:"דור פרץ",          nameEn:"Peretz",     pos:"CM", faId:59512},
-  {id:14, num:17, name:"כריסטיאן בליץ׳",  nameEn:"Belic",      pos:"CM", faId:0},
+  {id:14, num:17, name:"כריסטיאן בליץ׳",  nameEn:"Belic",       pos:"CM", faId:0},
   {id:15, num:23, name:"בן לדרמן",         nameEn:"Lederman",   pos:"CM", faId:224824},
   {id:16, num:28, name:"איסוף סיסוקו",     nameEn:"Sissokho",   pos:"CM", faId:0},
   {id:17, num:30, name:"איתמר נוי",        nameEn:"Noy",        pos:"CM", faId:108004},
@@ -386,9 +422,13 @@ function openPicker(side){
   pickSide=side;
   document.getElementById("pickerTitle").textContent=side==="home"?"בחר קבוצה (בית)":"בחר קבוצה (חוץ)";
   grid.innerHTML="";
-  teams.forEach(t=>{
+  
+  // טוען את המערך המתאים בהתאם למצב (מונדיאל או רגיל)
+  const currentTeamsList = isWorldCupMode ? nationalTeams : teams;
+  
+  currentTeamsList.forEach(t=>{
     const d=document.createElement("div");d.className="pick";
-    d.innerHTML=`<img src="${t.logo}" loading="lazy"><div>${t.name}</div>`;
+    d.innerHTML=`<img src="${t.logo}" loading="lazy" style="object-fit:contain; padding:4px;"><div>${t.name}</div>`;
     d.onclick=()=>{
       document.getElementById(pickSide+"Logo").src=t.logo;
       document.getElementById(pickSide+"Name").textContent=t.name;
@@ -396,7 +436,7 @@ function openPicker(side){
       updateLineupButton();
       pickerDlg.close();
       // ── הפעל פתיח אם נבחרו פריז סן ז'רמן + ארסנל ──
-      if(isPsgArsenal()) showIntro();
+      if(!isWorldCupMode && isPsgArsenal()) showIntro();
     };
     grid.appendChild(d);
   });
