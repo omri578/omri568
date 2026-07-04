@@ -31,6 +31,7 @@
     .btn-half{background:#7ad1ff}
     .btn-worldcup{background:#d4af37;color:#000;}
     .btn-lineup{background:#FFE000;color:#005234;border:2px solid #005234;font-size:15px;display:none;}
+    .btn-penalties{background:#8a2be2;color:#fff;} /* תוספת: כפתור פנדלים */
     .varStatus{color:#fff;text-align:center;margin-top:12px;font-weight:900;
       background:rgba(0,0,0,.6);padding:8px 12px;border-radius:12px;}
 
@@ -146,6 +147,69 @@
     }
     #introSkip:hover{background:rgba(255,255,255,.32);}
     #introScreen.hidden{display:none;}
+
+    /* ===== MAVAR VIDEO SCREEN (PENALTIES) ===== */
+    #mavarScreen{
+      position:fixed;inset:0;z-index:9999;
+      background:#000;
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    #mavarScreen.hidden{display:none;}
+    #mavarVideo{
+      position:relative;z-index:2;
+      width:100%;max-width:860px;
+      border-radius:18px;
+      display:block;
+    }
+
+    /* ===== PENALTIES MODAL ===== */
+    #penaltiesModal{
+      display:none;
+      position:fixed;inset:0;z-index:10000;
+      background:rgba(0,0,0,.95);
+      flex-direction:column;align-items:center;justify-content:center;
+      color:#fff;padding:20px;
+    }
+    .pen-team-row{
+      display:flex;align-items:center;gap:20px;margin-bottom:30px;
+      background:rgba(255,255,255,.08);padding:20px;border-radius:20px;
+      width:100%;max-width:700px;
+    }
+    .pen-team-info{
+      display:flex;flex-direction:column;align-items:center;width:90px;flex-shrink:0;
+    }
+    .pen-team-info img{
+      width:70px;height:70px;border-radius:14px;object-fit:cover;
+      background:#fff;border:3px solid #fff;
+    }
+    .pen-team-info span{
+      font-size:13px;font-weight:800;margin-top:8px;text-align:center;
+    }
+    .pen-circles-container{
+      display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;
+    }
+    .pen-circle{
+      width:40px;height:40px;border-radius:50%;
+      border:3px solid rgba(255,255,255,.4);background:transparent;
+      cursor:pointer;user-select:none;touch-action:manipulation;
+      transition:all 0.2s ease;
+    }
+    .pen-circle.scored{background:#00c853;border-color:#00c853;}
+    .pen-circle.missed{background:#d50000;border-color:#d50000;}
+    .btn-add-pen{
+      background:rgba(255,255,255,.2);color:#fff;border:none;
+      width:40px;height:40px;border-radius:50%;font-size:24px;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;transition:background 0.2s;
+    }
+    .btn-add-pen:hover{background:rgba(255,255,255,.4);}
+    .btn-close-pen{
+      position:absolute;top:20px;right:20px;
+      background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.3);
+      color:#fff;padding:10px 18px;border-radius:12px;cursor:pointer;
+      font-weight:700;font-family:'Heebo',Arial,sans-serif;
+    }
   </style>
 </head>
 <body>
@@ -155,6 +219,11 @@
   <div id="introBgOverlay"></div>
   <video id="introVideo" autoplay playsinline muted src="assets/intro.mp4"></video>
   <button id="introSkip" onclick="closeIntro()">דלג ›</button>
+</div>
+
+<div id="mavarScreen" class="hidden">
+  <video id="mavarVideo" playsinline muted></video>
+  <button id="introSkip" style="z-index:10;" onclick="skipMavar()">דלג ›</button>
 </div>
 
 <div class="app">
@@ -183,8 +252,32 @@
       <button class="btn-half" onclick="runHalf()">מחצית</button>
       <button class="btn-worldcup" onclick="startWorldCupMode()">🏆 מצב מונדיאל</button>
       <button class="btn-lineup" id="lineupBtn" onclick="openLineup()">🟡 הרכב מכבי</button>
+      <button class="btn-penalties" onclick="startPenalties()">פנדלים</button>
     </div>
     <div class="varStatus" id="varStatus">VAR: אין בדיקה כרגע</div>
+  </div>
+</div>
+
+<div id="penaltiesModal">
+  <button class="btn-close-pen" onclick="closePenalties()">✕ חזור ללוח</button>
+  <h2 style="margin-bottom:30px; font-weight:900; font-size:32px;">דו קרב פנדלים</h2>
+  
+  <div class="pen-team-row">
+    <div class="pen-team-info">
+      <img id="penHomeLogo" src="">
+      <span id="penHomeName"></span>
+    </div>
+    <div class="pen-circles-container" id="penHomeCircles"></div>
+    <button class="btn-add-pen" onclick="addPenaltyRound()">+</button>
+  </div>
+
+  <div class="pen-team-row">
+    <div class="pen-team-info">
+      <img id="penAwayLogo" src="">
+      <span id="penAwayName"></span>
+    </div>
+    <div class="pen-circles-container" id="penAwayCircles"></div>
+    <button class="btn-add-pen" onclick="addPenaltyRound()">+</button>
   </div>
 </div>
 
@@ -631,6 +724,86 @@ function openLineup(){
 function closeLineup(){
   document.getElementById("lineupModal").classList.remove("open");
   document.body.style.overflow="";
+}
+
+/* ===== PENALTIES LOGIC ===== */
+let penaltyRounds = 5;
+
+function startPenalties(){
+  const mScreen = document.getElementById("mavarScreen");
+  const mVideo = document.getElementById("mavarVideo");
+  mVideo.src = "assets/mavar.mp4";
+  mScreen.classList.remove("hidden");
+  mVideo.currentTime = 0;
+  mVideo.muted = false;
+  mVideo.play().catch(()=>{ mVideo.muted = true; mVideo.play(); });
+  mVideo.onended = showPenaltiesUI;
+}
+
+function skipMavar(){
+  const mVideo = document.getElementById("mavarVideo");
+  mVideo.pause();
+  showPenaltiesUI();
+}
+
+function showPenaltiesUI(){
+  document.getElementById("mavarScreen").classList.add("hidden");
+  
+  // משיכת הקבוצות מהלוח הראשי
+  document.getElementById("penHomeLogo").src = document.getElementById("homeLogo").src;
+  document.getElementById("penHomeName").textContent = homeName;
+  document.getElementById("penAwayLogo").src = document.getElementById("awayLogo").src;
+  document.getElementById("penAwayName").textContent = awayName;
+
+  penaltyRounds = 5;
+  renderPenaltyCircles();
+  
+  document.getElementById("penaltiesModal").style.display = "flex";
+}
+
+function closePenalties(){
+  document.getElementById("penaltiesModal").style.display = "none";
+}
+
+function renderPenaltyCircles(){
+  const hContainer = document.getElementById("penHomeCircles");
+  const aContainer = document.getElementById("penAwayCircles");
+  hContainer.innerHTML = "";
+  aContainer.innerHTML = "";
+  
+  for(let i=0; i<penaltyRounds; i++){
+    hContainer.appendChild(createPenCircle());
+    aContainer.appendChild(createPenCircle());
+  }
+}
+
+function createPenCircle(){
+  const div = document.createElement("div");
+  div.className = "pen-circle";
+  // state: 0 = ריק, 1 = ירוק (גול), 2 = אדום (החמצה)
+  div.dataset.state = "0";
+  div.onclick = function(){
+    let state = parseInt(this.dataset.state);
+    state = (state + 1) % 3;
+    this.dataset.state = state;
+    
+    if(state === 0){
+      this.classList.remove("scored", "missed");
+    } else if(state === 1){
+      this.classList.add("scored");
+      this.classList.remove("missed");
+    } else {
+      this.classList.add("missed");
+      this.classList.remove("scored");
+    }
+  };
+  return div;
+}
+
+function addPenaltyRound(){
+  penaltyRounds++;
+  document.getElementById("penHomeCircles").appendChild(createPenCircle());
+  document.getElementById("penAwayCircles").appendChild(createPenCircle());
 }
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
