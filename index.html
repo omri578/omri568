@@ -31,7 +31,7 @@
     .btn-half{background:#7ad1ff}
     .btn-worldcup{background:#d4af37;color:#000;}
     .btn-lineup{background:#FFE000;color:#005234;border:2px solid #005234;font-size:15px;display:none;}
-    .btn-penalties{background:#8a2be2;color:#fff;} /* תוספת: כפתור פנדלים */
+    .btn-penalties{background:#8a2be2;color:#fff;display:none;} /* מוסתר כברירת מחדל */
     .varStatus{color:#fff;text-align:center;margin-top:12px;font-weight:900;
       background:rgba(0,0,0,.6);padding:8px 12px;border-radius:12px;}
 
@@ -221,6 +221,7 @@
   <button id="introSkip" onclick="closeIntro()">דלג ›</button>
 </div>
 
+<!-- סרטון מעבר לפנדלים -->
 <div id="mavarScreen" class="hidden">
   <video id="mavarVideo" playsinline muted></video>
   <button id="introSkip" style="z-index:10;" onclick="skipMavar()">דלג ›</button>
@@ -252,12 +253,14 @@
       <button class="btn-half" onclick="runHalf()">מחצית</button>
       <button class="btn-worldcup" onclick="startWorldCupMode()">🏆 מצב מונדיאל</button>
       <button class="btn-lineup" id="lineupBtn" onclick="openLineup()">🟡 הרכב מכבי</button>
-      <button class="btn-penalties" onclick="startPenalties()">פנדלים</button>
+      <!-- כפתור פנדלים (מוסתר כברירת מחדל) -->
+      <button class="btn-penalties" id="penaltiesBtn" onclick="startPenalties()">פנדלים</button>
     </div>
     <div class="varStatus" id="varStatus">VAR: אין בדיקה כרגע</div>
   </div>
 </div>
 
+<!-- מסך פנדלים -->
 <div id="penaltiesModal">
   <button class="btn-close-pen" onclick="closePenalties()">✕ חזור ללוח</button>
   <h2 style="margin-bottom:30px; font-weight:900; font-size:32px;">דו קרב פנדלים</h2>
@@ -398,6 +401,7 @@ function showIntro(){
 
 function startWorldCupMode(){
   isWorldCupMode = true;
+  document.getElementById("penaltiesBtn").style.display = "inline-block"; // מציג את כפתור הפנדלים
   const screen = document.getElementById("introScreen");
   const vid    = document.getElementById("introVideo");
   vid.src = "assets/world.mp4"; 
